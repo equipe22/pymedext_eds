@@ -327,7 +327,7 @@ class SyntagmeTokenizer(Annotator):
             
             for syntagme in syntagmes:
                 
-                start = sent.value.find(syntagme)
+                start = sent.span[0] + sent.value.find(syntagme)
                 end = start + len(syntagme)-1
                 
                 res.append(Annotation(
@@ -490,11 +490,11 @@ class RegexMatcher(Annotator):
 
             for syntagme in syntagmes:
                 
-                all_rex += self.find_matches(rex, syntagme)
+                all_rex += self.find_matches(rex, syntagme, raw)
             
         return all_rex
 
-    def find_matches(self, rex, syntagme):
+    def find_matches(self, rex, syntagme, raw, snippet_size = 60):
         res = []
 
         if 'casesensitive' in rex.keys() and rex['casesensitive'] == 'yes': 
@@ -515,14 +515,17 @@ class RegexMatcher(Annotator):
                     i = int(rex['index_extract'])
                 else:
                     i = 0
-                start = m.start(i)
+                start = syntagme.span[0] + m.start(i)
                 end = start + len(m.group(i))
+                
+                snippet_span = (max(start-snippet_size, 0), min(end+snippet_size, raw.span[1]))
+                snippet_value = raw.value[snippet_span[0]:snippet_span[1]]
                 
                 res.append(Annotation(
                     type = self.key_output,
                     value = m.group(i), 
                     span = (start, end),
-                    attributes = {'version':rex['version'], 'label':rex['libelle'], 'id_regexp' : rex['id_regexp']},
+                    attributes = {'version':rex['version'], 'label':rex['libelle'], 'id_regexp' : rex['id_regexp'], 'snippet':snippet_value},
                     isEntity = True,
                     source = self.ID,
                     source_ID = syntagme.ID
