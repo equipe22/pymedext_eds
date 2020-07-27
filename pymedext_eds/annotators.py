@@ -335,7 +335,8 @@ class SyntagmeTokenizer(Annotator):
                     value = syntagme, 
                     span = (start, end),
                     source = self.ID,
-                    source_ID = sent.ID  
+                    source_ID = sent.ID, 
+                    attributes = sent.attributes.copy()
                 ))
 
             
@@ -525,7 +526,7 @@ class RegexMatcher(Annotator):
                     type = self.key_output,
                     value = m.group(i), 
                     span = (start, end),
-                    attributes = {'version':rex['version'], 'label':rex['libelle'], 'id_regexp' : rex['id_regexp'], 'snippet':snippet_value},
+                    attributes = {'version':rex['version'], 'label':rex['libelle'], 'id_regexp' : rex['id_regexp'], 'snippet':snippet_value, **syntagme.attributes},
                     isEntity = True,
                     source = self.ID,
                     source_ID = syntagme.ID
