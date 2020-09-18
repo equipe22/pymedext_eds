@@ -1,1 +1,14 @@
 pymedext_core
+flasktext
+pandas
+sentencepiece
+unidecode
+numpy
+nltk
+unicodedata
+flair
+signal
+contextlib
+sklearn
+collections
+rdflib>=4.2.2
