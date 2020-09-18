@@ -9,3 +9,6 @@ flair
 sklearn
 rdflib>=4.2.2
 spacy
+flask
+blist
+uvicorn
