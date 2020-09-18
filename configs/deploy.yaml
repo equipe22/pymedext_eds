@@ -1,0 +1,4 @@
+infer_config: /export/home/cse180025/prod_information_extraction/pymedext_eds/configs/infer.yaml
+post_config: /export/home/cse180025/prod_information_extraction/pymedext_eds/configs/postprocess.yaml            
+num_replicas: 10
+num_gpus: .32

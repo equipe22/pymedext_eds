@@ -1,6 +1,6 @@
 #!/export/home/cse180025/.conda/envs/pyenv_cse180025/bin/python
 
-from extract.utils import load_config
+from pymedext_eds.extract.utils import load_config
 import ray
 from ray import serve
 import requests
@@ -69,10 +69,11 @@ def init():
 
 @click.command()
 @click.argument("arg", type=click.STRING)
-def main(arg): 
+@click.option('--config_file', default="/export/home/cse180025/prod_information_extraction/pymedext_eds/configs/deploy.yaml", help='path to the config file')
+def main(arg, config_file): 
 
     if arg == 'start':
-        start()
+        start(config_file)
     elif arg == 'stop':
         stop()
     
@@ -84,20 +85,24 @@ def stop(endpoint = 'annotator'):
     serve.delete_endpoint(endpoint)
     serve.delete_backend(endpoint)
 
-def start(infer_config = "/export/home/cse180025/prod_information_extraction/configs/infer_configs/ray_v2.yaml",
-    post_config = '/export/home/cse180025/prod_information_extraction/configs/postp_configs/covid_v2_ray.yaml',              
-    num_replicas = 10,
-    num_gpus = .32):
+def start(config_file
+#     infer_config = "/export/home/cse180025/prod_information_extraction/configs/infer_configs/ray_v2.yaml",
+#     post_config = '/export/home/cse180025/prod_information_extraction/configs/postp_configs/covid_v2_ray.yaml',              
+#     num_replicas = 10,
+#     num_gpus = .32
+         ):
     
-    params = load_config(infer_config)
-    postprocess_params = load_config(post_config)
+    cfg = load_config(config_file)
+
+    params = load_config(cfg['infer_config'])
+    postprocess_params = load_config(cfg['post_config'])
     
     init()
     
     serve.init()
     
-    config = {"num_replicas": num_replicas}
-    actor_options = { "num_gpus": num_gpus}
+    config = {"num_replicas": cfg['num_replicas']}
+    actor_options = { "num_gpus": cfg['num_gpus']}
     serve.create_backend('annotator', 
                          Annotator, 
                          params,
