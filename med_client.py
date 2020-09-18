@@ -34,6 +34,7 @@ def process_chunk(i, raws, big_chunk, note_nlp_file = None, processed = [], proc
         res = ray.get([put_request.remote(c) for c in list(chunks(chunk, 10))])
     except Exception as e: 
         print(f"Error: {e}")
+        res = None
     
     if res is not None:
     
