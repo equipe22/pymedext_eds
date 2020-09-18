@@ -1,0 +1,41 @@
+inference_params:
+  device_id: 4
+  doc_batch: 100
+  input_dir: /export/home/cse180025/tmp_fast/for_inference_covid_v2/
+  keep_all_tokens: true
+  num_workers: 3
+  query_params:
+    from_i: 431
+    mode: '*.txt'
+    to_i: 2964825
+  save_tokenized: false
+  sentence_batch: 5
+  use_bert: true
+models_param:
+# - tag_name: pheno_pred
+#   tagger_path: /export/home/cse180025/prod_information_extraction/data/models/apcner/entities/final-model.pt
+# - tag_name: neg_pred
+#   tagger_path: /export/home/cse180025/prod_information_extraction/data/models/negation/final-model.pt
+- tag_name: entity_pred
+  tagger_path: /export/home/cse180025/prod_information_extraction/data/models/apmed2/entities/final-model.pt
+- tag_name: event_pred
+  tagger_path: /export/home/cse180025/prod_information_extraction/data/models/apmed/events/final-model.pt
+- tag_name: drugblob_pred
+  tagger_path: /export/home/cse180025/prod_information_extraction/data/models/apmed2/drugblob/final-model.pt
+preprocessing_param:
+  bert_tokenizer: /export/home/cse180025/prod_information_extraction/data/embeddings/bert-base-medical-cased/vocab.txt
+  concat_small: false
+  deprecated: false
+  max_sent_len: 290
+  perform_checks: false
+  section_kwargs:
+    mode: section_v2
+    terminology_path: /export/home/cse180025/prod_information_extraction/data/terminologies/section_headings/section_normed_v2.pickle
+  sentence_kwargs:
+    mode: pattern
+  terminology_featurizer_kwargs:
+    terminology_path: /export/home/cse180025/prod_information_extraction/data/terminologies/entities/keyworddict_aug.pickle
+  text_cleaner: bert_clean_text2
+  tokenization_kwargs:
+    mode: pattern_v2
+    perform_checks: false

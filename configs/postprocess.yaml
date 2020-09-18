@@ -1,0 +1,15 @@
+n_jobs: 15
+input_dir: &inpdir /export/home/cse180025/tmp_fast/for_inference_covid_v2/
+csv_pattern: "**/conll/*.csv"
+pp_params:
+    ent_tags: ["entity_pred", "event_pred"]
+    rel_tags: ["drugblob_pred"]
+    other_tags: ["section_tag"]
+    anchor_class: ["ENT/DRUG", "ENT/CLASS"]
+    normalize: True
+#     atcd_model_path: data/models/atcd_pred/atcd_pred_09042020.model
+    romedi_path: /export/home/cse180025/prod_information_extraction/pymedext/cache_Romedi2-2-0.p
+    class_norm: /export/home/cse180025/prod_information_extraction/data/terminologies/drug_classes/normalisation_classes.json
+    get_neg_score: False
+    text_suffix: "**/*.txt"
+    input_dir: *inpdir
