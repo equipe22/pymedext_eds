@@ -8,8 +8,8 @@ import datetime
 import pandas as pd
 import math
 
-from pymedext2.db import get_engine, get_from_omop_note, convert_chunk_to_doc
-from pymedext2.utils import timer, chunks
+from pymedext_eds.db import get_engine, get_from_omop_note, convert_chunk_to_doc
+from pymedext_eds.utils import timer, chunks
 
 from med_server import put_request #, start_server, stop_server
 from med_server import  load_processed_ids, chunk_to_omop, dump_omop_to_csv

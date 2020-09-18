@@ -4,10 +4,10 @@ from extract.utils import load_config
 import ray
 from ray import serve
 import requests
-from pymedext2.med import  Annotator
-from pymedext_core.document import Document
-from pymedext_core.annotators import Annotation
-from pymedext2.utils import timer
+from pymedext_eds.med import  Annotator
+from pymedextcore.document import Document
+from pymedextcore.annotators import Annotation
+from pymedext_eds.utils import timer
 import datetime
 import pandas as pd
 
