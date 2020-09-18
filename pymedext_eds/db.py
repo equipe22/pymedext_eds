@@ -2,7 +2,7 @@ import pgpasslib
 from sqlalchemy import create_engine
 import pandas as pd
 
-from pymedext_core.document import Document
+from pymedextcore.document import Document
 
 
 def get_engine(): 

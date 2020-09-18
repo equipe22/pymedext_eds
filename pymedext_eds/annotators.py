@@ -1,5 +1,5 @@
-from pymedext_core.annotators import Annotation, Annotator
-from pymedext_core.document import Document
+from pymedextcore.annotators import Annotation, Annotator
+from pymedextcore.document import Document
 import glob
 import re
 import json
