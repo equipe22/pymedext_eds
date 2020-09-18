@@ -5,6 +5,7 @@ from flair.datasets import ColumnCorpus
 import pandas as pd
 import flair
 import torch
+from typing import Union
 
 
 class TerminologyEmbeddings(TokenEmbeddings):
