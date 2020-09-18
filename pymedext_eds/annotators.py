@@ -4,7 +4,7 @@ import glob
 import re
 import json
 
-from .utils.verbs import verbs_list
+from .verbs import verbs_list
 
 def rawtext_loader(file): 
     with open(file) as f:

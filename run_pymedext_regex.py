@@ -6,7 +6,7 @@ import datetime
 from pymedext_eds.annotators import Endlines, SentenceTokenizer, Hypothesis, ATCDFamille, SyntagmeTokenizer, Negation, RegexMatcher, rawtext_loader
 from pymedext_core.document import Document
 
-from pymedext_eds.db import get_engine#, construct_query
+from pymedext_eds.db import get_engine, construct_query
 
 import math
 import pandas as pd
@@ -18,39 +18,41 @@ import multiprocessing
 
 from logzero import logger, logfile#, setup_default_logger
 
-def timer(func):
-    """Print the runtime of the decorated function"""
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        start_time = time.perf_counter()    # 1
-        value = func(*args, **kwargs)
-        end_time = time.perf_counter()      # 2
-        run_time = end_time - start_time    # 3
-        logger.info(f"Finished {func.__name__!r} in {run_time:.4f} secs")
-        return value
-    return wrapper_timer
+from pymedext_eds.utils import timer
+
+# def timer(func):
+#     """Print the runtime of the decorated function"""
+#     @functools.wraps(func)
+#     def wrapper_timer(*args, **kwargs):
+#         start_time = time.perf_counter()    # 1
+#         value = func(*args, **kwargs)
+#         end_time = time.perf_counter()      # 2
+#         run_time = end_time - start_time    # 3
+#         logger.info(f"Finished {func.__name__!r} in {run_time:.4f} secs")
+#         return value
+#     return wrapper_timer
 
 
-def construct_query(limit, min_date='2020-03-01', view='unstable'): 
-    if limit != -1:
-        limit = "LIMIT {}".format(limit)
-    else:
-        limit = ""
+# def construct_query(limit, min_date='2020-03-01', view='unstable'): 
+#     if limit != -1:
+#         limit = "LIMIT {}".format(limit)
+#     else:
+#         limit = ""
         
-    query = f"""
-        SELECT note_id, person_id, note_text, note_date
-        FROM {view}.note 
-        WHERE note_date > '{min_date}'
-        AND note_text IS NOT NULL OR note_text not in ('','\n', ' ') 
-        {limit}
-        """
-    #logger.debug('query set with parameters: view = {}, min_date= {}, limit={}'.format(view, min_date, limit))
-    return query
+#     query = f"""
+#         SELECT note_id, person_id, note_text, note_date
+#         FROM {view}.note 
+#         WHERE note_date > '{min_date}'
+#         AND note_text IS NOT NULL OR note_text not in ('','\n', ' ') 
+#         {limit}
+#         """
+#     #logger.debug('query set with parameters: view = {}, min_date= {}, limit={}'.format(view, min_date, limit))
+#     return query
 
 @timer
-def get_from_omop_note(engine, limit = -1, min_date='2020-03-01'):
+def get_from_omop_note(engine, limit = -1, min_date='2020-03-01', note_ids= None):
 
-    query = construct_query(limit, min_date)
+    query = construct_query(limit, min_date, note_ids = note_ids)
     return engine.execute(query)
     #return pd.read_sql_query(query, engine)
 
@@ -62,7 +64,7 @@ def convert_chunk_to_doc(query_res, chunksize):
         res.append(Document(raw_text=raw_text,
                             ID = note_id, 
                             attributes = {'person_id':person_id}, 
-                            documentDate = note_date
+                            documentDate = note_date.strftime("%Y/%m/%d")
         ))
     return res
 
@@ -255,7 +257,7 @@ if __name__ == '__main__':
     big_chunk = 20000
     chunksize = 1000
     num_jobs = 20
-    note_nlp_file = '/export/home/cse180025/prod_information_extraction/data/omop_tables/omop_tmp.csv'
+    note_nlp_file = '/export/home/cse180025/prod_information_extraction/data/omop_tables/note_nlp_pheno.csv'
     init = True
     
     if (init):
