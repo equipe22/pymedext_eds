@@ -4,6 +4,12 @@ import glob
 import re
 import json
 
+try:
+    from quickumls import QuickUMLS
+    from quickumls.constants import ACCEPTED_SEMTYPES
+except: 
+    print('QuickUMLS not installed. Please use "pip install quickumls"')
+
 from .verbs import verbs_list
 
 def rawtext_loader(file): 
@@ -545,3 +551,66 @@ class RegexMatcher(Annotator):
                 m['snippet'] = text[start:end]
                 res.append(m)
         return res
+
+
+class QuickUMLSAnnotator(Annotator):
+
+    def __init__(self, key_input, key_output, ID, 
+                quickumls_fp = '/Users/antoine/git/QuickUMLS/umls_data/',
+                overlapping_criteria = "length", # "score" or "length"
+                threshold = 0.9,
+                similarity_name = "jaccard", # Choose between "dice", "jaccard", "cosine", or "overlap".
+                window = 5,
+                accepted_semtypes = ACCEPTED_SEMTYPES): 
+        
+        super().__init__(key_input, key_output, ID)
+        
+        
+        self.matcher = QuickUMLS(quickumls_fp=quickumls_fp , 
+                                 overlapping_criteria=overlapping_criteria, 
+                                 threshold=threshold, 
+                                 window=window,
+                                 similarity_name=similarity_name,
+                                accepted_semtypes=accepted_semtypes)
+        
+
+    def match(self, text):
+        return self.matcher.match(text)
+    
+    def annotate_function(self, _input):
+        
+        inp = self.get_all_key_input(_input)
+        
+        res = []
+        
+        for sent in inp:
+            
+            ents = self.match(sent.value)
+            
+            if sent.attributes is None: 
+                sent.attributes = {}
+            
+            for ent in ents: 
+                
+                ent_attr = {'cui':ent[0]['cui'],
+                           'label': ent[0]['term'],
+                           'semtypes': ent[0]['semtypes'],
+                           'score': ent[0]['similarity'], 
+                            'snippet': sent.value
+                           }
+                
+                start = sent.span[0] + ent[0]['start']
+                end = sent.span[0] + ent[0]['end']
+                
+                res.append(Annotation(
+                    type = self.key_output,
+                    value = ent[0]['ngram'], 
+                    span = (start, end),
+                    source = self.ID,
+                    source_ID = sent.ID, 
+                    attributes = {**sent.attributes.copy() , **ent_attr}
+                ))
+                
+        return res
+          
+
