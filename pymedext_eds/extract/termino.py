@@ -1,11 +1,11 @@
 from flair.embeddings import *
 import os
-from flair.data import Corpus
+from flair.data import Corpus, Sentence
 from flair.datasets import ColumnCorpus
 import pandas as pd
 import flair
 import torch
-from typing import Union
+from typing import Union, List
 
 
 class TerminologyEmbeddings(TokenEmbeddings):

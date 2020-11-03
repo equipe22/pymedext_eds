@@ -70,11 +70,11 @@ class ConllPostProcess(object):
                                    "ENT/DOSE":{}}
             
         #to get raw mention of entites (without tokenization)
-        if text_suffix != "":
-            watch = pd.read_csv(join(input_dir, "watch.csv"))
-            self.text_paths = watch.set_index('id').loc[:,"path"].to_dict()
-        else:
-            self.text_paths = {}
+ #       if text_suffix != "":
+ #           watch = pd.read_csv(join(input_dir, "watch.csv"))
+ #           self.text_paths = watch.set_index('id').loc[:,"path"].to_dict()
+ #       else:
+        self.text_paths = {}
             
         #for versioning
         # repo = git.Repo(search_parent_directories=True)
