@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 SECTION_DICT = {
     'antecedent': ['ANTECEDENTS MEDICAUX',
                 'ANTÉCÉDENTS',
@@ -1317,3 +1319,159 @@ CLASS_NORM = {
                       'A11E (COMPLEXE VITAMINIQUE B, ASSOCIATIONS INCLUSES)',
                       'A11A (POLYVITAMINES EN ASSOCIATION)',
                       'B05XC (VITAMINES)']}
+
+
+
+################################################
+# Constants for freq and doses
+
+NUMBER = {'zero': '0',
+ 'une ': '1 ',
+ 'un ': '1 ',
+
+ 'deux': '2',
+ 'trois': '3',
+ 'quatre': '4',
+ 'cinq': '5',
+ 'six': '6',
+ 'sept': '7',
+ 'huit': '8',
+ 'neuf': '9',
+ 'dix': '10',
+ 'onze': '11',
+ 'douze': '12',
+ 'treize': '13',
+ 'quatorze': '14',
+ 'quinze': '15',
+ 'seize': '16',
+ 'dix-sept': '17',
+ 'dix-huit': '18',
+ 'dix-neuf': '19'}
+
+FREQ_REPLACE = {"les ":" ",
+                "le ":" ",
+                "par ":" ",
+                " et ":" ",
+                "a ":" ",
+                "fois ":" ",
+                "x ":" ",
+                "^jr?$":"jour",
+                "jours":"jour",
+                r'(\d) ?jr?$': r'\g<1> jour',
+                '(\d) ?h(\s|$)':'\g<1> heure\g<2>',
+                r'x ?(\d)': r'\g<1>',
+                "heures":"heure",
+                "semaines":"semaine",
+
+                "toutes|tous|toute":"tout"
+               }
+
+FREQ_EXP = OrderedDict({
+    "error":["0 midi", "1 .0.0", "garde veine"],
+    "J_1/2":["1 jour sur 2", "tout 2 jour"],
+
+    "H_1 1 1 1":["3 4 jour", "4 jour", "tout 6 heure", "6 heure", "^1 1 1 1$"],
+    "H_1 1 0 1":["matin midi soir", "3 jour", "tout 8 heure", "8 heure", "^1 1 1$"],
+    "H_1 0 0 1":["(1 )?matin soir", "2 jour", "^1 0 1$"],
+    "H_1 1 0 0":["matin midi", "^1 1 0$"],
+    "H_0 1 0 1":["midi soir", "^0 0 1$"],
+    "H_0 0 0 1":["(1 )?soir",  "au coucher", "20 00", "^0 0 1$"],
+    "H_0 1 0 0":["midi", "^0 1 0$"],
+    "H_0 0 1 0":["au gouter"],
+
+    "H_2 2 2 2":["^2 2 2 2$"],
+    "H_2 2 0 2":["^2 2 2$"],
+    "H_2 0 0 2":[ "^2 0 2$"],
+    "H_2 2 0 0":[ "^2 2 0$"],
+    "H_0 0 0 2":[ "^0 0 2$"],
+    "H_0 2 0 0":[ "^0 2 0$"],
+    "H_2 0 0 0":[ "^2 0 0$"],
+    "H_3 3 3 3":["^3 3 3 3$"],
+    "H_3 3 0 3":["^3 3 3$"],
+    "H_3 0 0 3":[ "^3 0 3$"],
+    "H_3 3 0 0":[ "^3 3 0$"],
+    "H_0 0 0 3":[ "^0 0 3$"],
+    "H_0 3 0 0":[ "^0 3 0$"],
+    "H_3 0 0 0":[ "^3 0 0$"],
+
+
+    #semaine
+    "S_1/2":["tout 2 semaine", "tout 15 jour"],
+    "S_1/3":["tout 3 semaine"],
+    "S_1/6":["tout 6 semaine"],
+    "S_1/8":["tout 2 mois", "2 mois", "tout 8 semaine"],
+    "S_1/13":["tout 3 mois", "3 mois", "tout 12 semaine", "trimestrielle"],
+    "S_1/26":["tout 6 mois", "6 mois", "semestrielle"],
+    "S_1/17":["tout 4 mois", "4 mois"],
+    
+    #jour
+    "J_3/7":["3 semaine"],
+
+    #unspecifix, FP generation
+    "S_1/4":["tout mois", "mois", "tout 4 semaine", "mensuelle"],
+    "J_1/7":["(1 )?semaine", "hebdomadaire", " lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche"],
+    "H_1 0 0 0":["(1 )?matin", "tout jour", "(1 )?jour", "tout 24 heure", "24 heure", "09 00",  "^1 0 0$"],
+
+}
+)
+
+
+NUMBER_4_DOSE = {'zero': '0',
+ 'une ': '1 ',
+ 'un ': '1 ',
+ 'deux': '2',
+ 'trois': '3',
+ 'quatre': '4',
+ 'cinq': '5',
+ 'six': '6',
+ 'sept': '7',
+ 'huit': '8',
+ 'neuf': '9',
+ 'dix': '10',
+ 'onze': '11',
+ 'douze': '12',
+ 'treize': '13',
+ 'quatorze': '14',
+ 'quinze': '15',
+ 'seize': '16',
+ 'dix-sept': '17',
+ 'dix-huit': '18',
+ 'dix-neuf': '19',
+ #autre
+"fois ": "x ",
+"double":"2",
+"triple": "3"
+         }
+
+UNITS = OrderedDict({
+    "mg/kg":["mg kg"],
+    "mg/ml":["mg ml"],
+    "µg/kg":["[µμ]g kg", "mcg kg"],
+    "µg/ml":["[µμ]g ml", "mcg ml"],
+
+    "unit/kg":["goutte par kg"],
+    "%":["%", "pourcent"],
+    "mg":["mg", "milligrammes?"],
+    "ml":["ml", "millilitres?"],
+    "unit":["cps?", "comprimes?", "cpr",
+          "ampoules?", "amp",
+            "doses?",
+          "injections?", 
+          "applications?", "patchs?", "tubes?",
+          "gell?ule?",
+          "bouffees?", 
+          "gouttes?", "gttes?", 
+          "flacon",
+          "sachet",
+          "ui", "unites?",
+          "pulverisations?", "inhalations?",
+          "perfusions?", "bolus",
+            "cycle", "cure"
+           ],
+    "g":["g", "grammes?"],
+    "µg":["[µμ]g", "microgrammes?", "mcg"],
+    "µmol":["[µμ]mol", "micromol", "mcmol"],
+    "kcal":["kcal", "kilocalories?"],
+    "cc":["cc", "centilitre"]
+        })
+

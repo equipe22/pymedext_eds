@@ -16,3 +16,4 @@ uvicorn
 quickumls
 ray
 pydantic
+logzero
