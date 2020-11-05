@@ -19,14 +19,15 @@ from .verbs import verbs_list
 def rawtext_loader(file): 
     with open(file) as f:
         txt = f.read()
-        ID = re.search("([0-9]+)\.txt$", file)
+        ID = re.search("([A-Za-z0-9]+)\.txt$", file)
         if not ID:
             ID = file
         else:
             ID  = ID.groups()[0]
     return Document(
         raw_text = txt,
-        ID = ID
+        ID = ID,
+        attributes = {'person_id': ID}
     )
 
 
