@@ -1,12 +1,12 @@
 from flair.embeddings import *
 import os
-from flair.data import Corpus, Sentence
+from flair.data import Corpus, Sentence, Dictionary
 from flair.datasets import ColumnCorpus
 import pandas as pd
 import flair
 import torch
 from typing import Union, List
-
+from collections import Counter
 
 class TerminologyEmbeddings(TokenEmbeddings):
     """One-hot encoded embeddings."""
