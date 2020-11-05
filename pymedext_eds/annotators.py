@@ -3,6 +3,8 @@ from pymedextcore.document import Document
 import glob
 import re
 import json
+from flashtext import KeywordProcessor
+import pandas as pd
 
 try:
     from quickumls import QuickUMLS
@@ -10,6 +12,8 @@ try:
 except: 
     print('QuickUMLS not installed. Please use "pip install quickumls"')
 
+    
+from .constants import SECTION_DICT   
 from .verbs import verbs_list
 
 def rawtext_loader(file): 
@@ -124,24 +128,28 @@ class Endlines(Annotator):
 class SentenceTokenizer(Annotator):
     
     def annotate_function(self, _input):
-        inp= self.get_first_key_input(_input)[0]
+        inps= self.get_all_key_input(_input)
         
         res = []
+        offset = 0
         
-        for sent in re.split(r'([\r\n;\?!.])', inp.value):
-            if sent in ['.','', ' ', ';']:
-                continue
-            
-            start = inp.value.find(sent)
-            end = start + len(sent)
-            
-            res.append(Annotation(
-                type = self.key_output,
-                value = sent, 
-                span = (start, end),
-                source = self.ID,
-                source_ID = inp.ID
-            ))
+        for inp in inps:
+        
+            for sent in re.split(r'([\r\n;\?!.])', inp.value):
+                if sent in ['.','', ' ', ';']:
+                    continue
+
+                start = inp.value.find(sent) + offset
+                end = start + len(sent)
+
+                res.append(Annotation(
+                    type = self.key_output,
+                    value = sent, 
+                    span = (start, end),
+                    source = self.ID,
+                    source_ID = inp.ID
+                ))
+            offset = end
         return res
 
 
@@ -614,3 +622,53 @@ class QuickUMLSAnnotator(Annotator):
         return res
           
 
+        
+class SectionSplitter(Annotator):
+    def __init__(self, key_input, key_output, ID, section_dict = SECTION_DICT): 
+        
+        super().__init__(key_input, key_output, ID)
+        
+        self.keyword_processor = KeywordProcessor(case_sensitive=True)
+        self.keyword_processor.add_keywords_from_dict(section_dict)
+        self.head_before_treat = [ "histoire", "evolution"]
+    
+    def annotate_function(self, _input):
+        inp= self.get_first_key_input(_input)[0]
+        
+        res = []
+        
+        match = self.keyword_processor.extract_keywords(inp.value, span_info = True)
+        match = pd.DataFrame(match, columns=["match_type", "start", "end"]).sort_values(['start','end'])
+        match = (match.append({"match_type": 'head', "start":0}, ignore_index=True)
+                 .sort_values('start')
+                 .assign(end = lambda x:x.start.shift(-1).fillna(len(inp.value)).astype('int'))
+                 .assign(sl = lambda x:x.start - x.end).loc[lambda x:x.sl!=0].drop("sl", axis=1)
+                 .reset_index(drop=True)
+                )
+        
+        #set any traitement section occuring before histoire or evolution to traitement entree
+        index_before_treat = match.loc[lambda x:x.match_type.isin(self.head_before_treat)].index.tolist()
+        index_before_treat = min(index_before_treat, default=0)
+        match.loc[lambda x:(x.match_type == "traitement")&(x.index < index_before_treat), "match_type"] = "traitement_entree"
+        
+        
+        if inp.attributes is None:
+            attributes = {}
+        else:
+            attributes = inp.attributes.copy()
+        
+        for index, row in match.iterrows():
+            
+            att = attributes.copy()
+            att[self.key_output] = row['match_type']
+            
+            res.append(Annotation(
+                type = self.key_output,
+                value = inp.value[row['start']:row['end']],
+                span = (row['start'],row['end']),
+                source = self.ID,
+                source_ID = inp.ID,
+                attributes = att
+                ))
+        
+        return res
