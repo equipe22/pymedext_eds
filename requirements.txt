@@ -1,10 +1,11 @@
-pymedext_core
+git+git://github.com/equipe22/pymedext_core.git@master#egg=pymedextcore
 flashtext
 pandas
 sentencepiece
 unidecode
 numpy
 nltk
+torch
 flair
 sklearn
 rdflib>=4.2.2
@@ -12,3 +13,6 @@ spacy
 flask
 blist
 uvicorn
+quickumls
+ray
+pydantic
