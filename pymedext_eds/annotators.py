@@ -134,6 +134,11 @@ class SentenceTokenizer(Annotator):
         offset = 0
         
         for inp in inps:
+            
+            if inp.attributes is None:
+                attributes = None
+            else:
+                attributes = inp.attributes.copy()
         
             for sent in re.split(r'([\r\n;\?!.])', inp.value):
                 if sent in ['.','', ' ', ';']:
@@ -147,7 +152,8 @@ class SentenceTokenizer(Annotator):
                     value = sent, 
                     span = (start, end),
                     source = self.ID,
-                    source_ID = inp.ID
+                    source_ID = inp.ID, 
+                    attributes = attributes 
                 ))
             offset = end
         return res
