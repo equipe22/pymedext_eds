@@ -18,7 +18,7 @@ import datetime
 import ray
 from ray.serve.utils import _get_logger
 logger = _get_logger()
-
+from tqdm import tqdm
 
 import re
 #import torch
@@ -58,6 +58,59 @@ class TextDataset(Dataset):
     
     def __len__(self):
         return len(self.observations) -1
+    
+
+#from pymedextcore.document import Document
+from .annotators import Endlines, SentenceTokenizer, SectionSplitter, rawtext_loader
+from .utils import timer, to_chunks
+#from pymedext_eds.med import MedicationAnnotator, MedicationNormalizer
+import pkg_resources
+from glob import glob
+
+class Pipeline:
+    def __init__(self, 
+                 device = None):
+        
+        if device is None:
+            if ray.get_gpu_ids() != []:
+                device = f'cuda:0'
+            else:
+                device = 'cpu'
+        
+        self.endlines = Endlines(["raw_text"], "clean_text", ID="endlines")
+        self.sections = SectionSplitter(['clean_text'], "section", ID= 'sections')
+        self.sentenceSplitter = SentenceTokenizer(["section"],"sentence", ID="sentences")
+
+        self.models_param = [{'tagger_path':'/export/home/cse180025/prod_information_extraction/data/models/apmed4/entities/final-model.pt' ,
+                'tag_name': 'entity_pred' },
+                {'tagger_path':'/export/home/cse180025/prod_information_extraction/data/models/apmed4/events/final-model.pt' ,
+                'tag_name': 'event_pred' },
+               {'tagger_path': "/export/home/cse180025/prod_information_extraction/data/models/apmed4/drugblob/final-model.pt",
+                'tag_name': 'drugblob_pred'}]
+
+        self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param,  device= device)
+
+        data_path = pkg_resources.resource_filename('pymedext_eds', 'data/romedi')
+        romedi_path = glob(data_path + '/*.p')[0]
+
+        self.norm = MedicationNormalizer(['ENT/DRUG','ENT/CLASS'], 'normalized_mention', ID='norm',romedi_path= romedi_path)
+        
+        self.pipeline = [self.endlines,self.sections, self.sentenceSplitter, self.med, self.norm]
+        
+    
+    def process(self, payload):        
+        docs = [Document.from_dict(doc) for doc in payload ]        
+        for doc in docs:
+            doc.annotate(self.pipeline)           
+        return [doc.to_dict() for doc in docs]
+    
+    
+    def __call__(self, flask_request):
+        
+        payload = flask_request.json
+        res = self.process(payload)
+        
+        return {'result':res}
 
 # class Annotator(Extractor):
 #     def __init__(self, params, postprocess_params):
@@ -420,7 +473,7 @@ class MedicationAnnotator(Annotator):
         return res
     
     @staticmethod
-    def doc_to_omop(annotated_doc): 
+    def doc_to_omop(annotated_doc, new_norm = False): 
     
         annots = [x.to_dict() for x in annotated_doc.get_annotations('ENT/DRUG') + annotated_doc.get_annotations('ENT/CLASS') ]
         sentences = [x.to_dict() for x in annotated_doc.get_annotations('sentence')]
@@ -435,7 +488,7 @@ class MedicationAnnotator(Annotator):
         for drug in annots: 
 
             section = drug["attributes"]['section']
-            sentence = [x['value'] for x in sentences if x['id'] == drug['source_ID']][0]
+            sentence = [x['value'] for x in sentences if x['ID'] == drug['source_ID']][0]
 
             norm = None
             if 'normalized_mention' in drug["attributes"].keys(): 
@@ -445,12 +498,13 @@ class MedicationAnnotator(Annotator):
                     else: 
                         norm = drug['attributes']['normalized_mention']
 
-                    if norm is not None:
+                    # new normalization with concept code separated from label 
+                    # deactivated by default to ensure retro-compatibility
+                    if norm is not None and new_norm :
                         norm_extract = re.search('^([A-Z0-9]+) \((.+)\)', norm)
                         if norm_extract:
                             norm = norm_extract.group(1)
                             drug['attributes']['ATC_LABEL'] = norm_extract.group(2)
-
             dose = None
             dose_norm = None
             route = None

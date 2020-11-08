@@ -20,3 +20,14 @@ def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+
+def to_chunks(lst, n):
+    """List of sublists of size n form lst
+    :param lst: List
+    :param n: Integer
+    :returns: List"""
+    res = []
+    for i in range(0,len(lst), n):
+        res.append(lst[i:i+n])
+    return res
