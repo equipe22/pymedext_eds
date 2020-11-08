@@ -1,5 +1,4 @@
-
-from flair.embeddings import *
+from flair.embeddings import TransformerWordEmbeddings, ELMoEmbeddings, StackedEmbeddings
 from flair.embeddings.legacy import BertTokenizer
 import os
 from torch.optim import SGD, Adam, AdamW, ASGD
