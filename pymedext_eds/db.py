@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 from pymedextcore.document import Document
+from .med import MedicationAnnotator
 
 
 def get_engine(): 
@@ -69,3 +70,40 @@ def convert_chunk_to_doc(query_res, chunksize):
                             documentDate = note_date.strftime("%Y/%m/%d")
         ))
     return res
+
+
+
+
+
+
+def convert_notes_to_doc(notes): 
+    res = []
+    
+    for note_id, person_id, raw_text, note_date in notes: 
+        res.append(Document(raw_text=raw_text,
+                            ID = note_id, 
+                            attributes = {'person_id':person_id}, 
+                            documentDate = note_date.strftime("%Y/%m/%d")
+        ))
+    return res
+
+
+def load_processed_ids(filename = 'data/omop_tables/notes_processed_med.txt'): 
+    processed = []
+    with open(filename, 'r') as f:
+        for ID in f: 
+            processed.append(int(ID.strip()))
+            
+    return set(processed)
+
+def chunk_to_omop(annotated_chunk): 
+    
+    omop = [MedicationAnnotator.doc_to_omop(x) for x in annotated_chunk]
+    omop = [item for sublist in omop for item in sublist]
+    
+    return pd.DataFrame.from_records(omop)
+
+
+def dump_omop_to_csv(note_nlp, filename, mode = 'a'): 
+    
+    note_nlp.to_csv(filename,index = False, header = False, mode = mode)    

@@ -15,5 +15,5 @@ blist
 uvicorn
 quickumls
 ray
-pydantic
+pydantic==1.6
 logzero
