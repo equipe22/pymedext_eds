@@ -2,7 +2,7 @@
 
 ## Installation 
 
-Requires the installation of PyMedExt_core [https://github.com/equipe22/pymedext_core](PyMedExt_core)
+Requires the installation of PyMedExt_core [PyMedExt_core](https://github.com/equipe22/pymedext_core)
 It can be done using `requirements.txt`
 
 ```bash
