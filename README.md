@@ -128,7 +128,7 @@ from flask import Flask, render_template, request
 
 from pymedext_eds.annotators import Endlines, SentenceTokenizer, Hypothesis, \
                                     ATCDFamille, SyntagmeTokenizer, Negation, RegexMatcher, \
-                                    QuickUMLSAnnotator, Pipeline
+                                    Pipeline
 
 endlines = Endlines(['raw_text'], 'endlines', 'endlines:v1')
 sentences = SentenceTokenizer(['endlines'], 'sentence', 'sentenceTokenizer:v1')
