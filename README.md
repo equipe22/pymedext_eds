@@ -110,7 +110,7 @@ display_annotations(chunk[0], ['regex'])
     - input: sentence or syntagm
     - output: Annotations
 - QuickUMLSAnnotator: 
-    - Extracts medical concepts from UMLS using [QuickUMLS]([https://github.com/Georgetown-IR-Lab/QuickUMLS])
+    - Extracts medical concepts from UMLS using [QuickUMLS](https://github.com/Georgetown-IR-Lab/QuickUMLS)
     - output: Annotations
 - MedicationAnnotator:
     - Extracts medications informations using a deep learning pipeline
