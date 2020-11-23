@@ -82,9 +82,12 @@ display_annotations(chunk[0], ['regex'])
     - Used to clean the text when using text extracted from PDFs. Removes erroneous endlines introduced by pdf to text conversion. 
     - input : raw_text
     - output: Annotations
+- SectionSplitter: 
+    - Segments the text into sections
+    - output: Annotations
 - SentenceTokenizer: 
     - Tokenize the text in sentences
-    - input: cleaned text from Endlines
+    - input: cleaned text from Endlines or sections
     - output: Annotations
 - Hypothesis: 
     - Classification of sentences regarding the degree of certainty
