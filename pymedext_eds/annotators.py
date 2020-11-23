@@ -617,7 +617,7 @@ class QuickUMLSAnnotator(Annotator):
                 
                 ent_attr = {'cui':ent[0]['cui'],
                            'label': ent[0]['term'],
-                           'semtypes': ent[0]['semtypes'],
+                           'semtypes': list(ent[0]['semtypes']),
                            'score': ent[0]['similarity'], 
                             'snippet': sent.value
                            }
