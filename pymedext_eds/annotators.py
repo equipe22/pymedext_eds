@@ -30,6 +30,25 @@ def rawtext_loader(file):
         attributes = {'person_id': ID}
     )
 
+class Pipeline:
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        
+    def annotate(self, docs):
+        for doc in docs:
+            doc.annotate(self.pipeline)           
+        return [doc.to_dict() for doc in docs]
+    
+    def process(self, payload):        
+        docs = [Document.from_dict(doc) for doc in payload ]  
+        return self.annotate(docs)
+    
+    def __call__(self, flask_request):
+        
+        payload = flask_request.json
+        res = self.process(payload)
+        
+        return {'result':res}
 
 class Endlines(Annotator):
     
