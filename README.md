@@ -137,14 +137,8 @@ family = ATCDFamille(['sentence'], 'context', 'ATCDfamily:v1')
 syntagmes = SyntagmeTokenizer(['sentence'], 'syntagme', 'SyntagmeTokenizer:v1')
 negation = Negation(['syntagme'], 'negation', 'Negation:v1')
 regex = RegexMatcher(['endlines','syntagme'], 'regex', 'RegexMatcher:v1', 'list_regexp.json')
-umls = QuickUMLSAnnotator(['syntagme'], 'umls', 'QuickUMLS:2020AA', 
-                          quickumls_fp='/Users/antoine/git/QuickUMLS/umls_data/',
-                            overlapping_criteria='length',
-                            threshold=0.9,
-                            similarity_name='jaccard',
-                            window=5)
 
-pipeline = Pipeline(pipeline = [endlines, sentences, hypothesis, family, syntagmes, negation, regex, umls])
+pipeline = Pipeline(pipeline = [endlines, sentences, hypothesis, family, syntagmes, negation, regex])
 
 app=Flask(__name__)
 
