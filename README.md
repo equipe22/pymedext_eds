@@ -117,3 +117,63 @@ display_annotations(chunk[0], ['regex'])
     - output: Annotations 
 
 
+## Run a simple server
+
+### Define the server and the pipeline:
+
+```python
+import flask
+
+from flask import Flask, render_template, request
+
+from pymedext_eds.annotators import Endlines, SentenceTokenizer, Hypothesis, \
+                                    ATCDFamille, SyntagmeTokenizer, Negation, RegexMatcher, \
+                                    QuickUMLSAnnotator, Pipeline
+
+endlines = Endlines(['raw_text'], 'endlines', 'endlines:v1')
+sentences = SentenceTokenizer(['endlines'], 'sentence', 'sentenceTokenizer:v1')
+hypothesis = Hypothesis(['sentence'], 'hypothesis', 'hypothesis:v1')
+family = ATCDFamille(['sentence'], 'context', 'ATCDfamily:v1')
+syntagmes = SyntagmeTokenizer(['sentence'], 'syntagme', 'SyntagmeTokenizer:v1')
+negation = Negation(['syntagme'], 'negation', 'Negation:v1')
+regex = RegexMatcher(['endlines','syntagme'], 'regex', 'RegexMatcher:v1', 'list_regexp.json')
+umls = QuickUMLSAnnotator(['syntagme'], 'umls', 'QuickUMLS:2020AA', 
+                          quickumls_fp='/Users/antoine/git/QuickUMLS/umls_data/',
+                            overlapping_criteria='length',
+                            threshold=0.9,
+                            similarity_name='jaccard',
+                            window=5)
+
+pipeline = Pipeline(pipeline = [endlines, sentences, hypothesis, family, syntagmes, negation, regex, umls])
+
+app=Flask(__name__)
+
+@app.route('/annotate',methods = ['POST'])
+def result():
+    if request.method == 'POST':
+        
+        return pipeline.__call__(request)
+        
+if __name__ == '__main__':
+    app.run(port = 6666, debug=True)
+```
+
+Save this code in `demo_flask_server.py` and run it using: 
+
+```bash
+python demo_flask_server.py
+```
+
+### Query the server: 
+
+```python
+import requests
+from pymedextcore.document import Document
+
+
+json_doc = [doc.to_dict() for doc in chunk]
+res =  requests.post(f"http://127.0.0.1:6666/annotate", json = json_doc)
+if res.status_code == 200:
+    res = res.json()['result']
+    docs = [Document.from_dict(doc) for doc in res ]
+```
