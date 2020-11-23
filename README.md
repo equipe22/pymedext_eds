@@ -30,7 +30,9 @@ All the annotators are defined in the pymedext_eds.annotators module. You will f
 - First, import the annotators and text :
 
 ```python
-from pymedext_eds.annotators import rawtext_loader, Endlines, SentenceTokenizer, \
+from pymedext_eds.utils import rawtext_loader
+
+from pymedext_eds.annotators import Endlines, SentenceTokenizer, \
                                     RegexMatcher, Pipeline 
 
 from pymedext_eds.viz import display_annotations
@@ -72,8 +74,6 @@ pprint(annotated_docs[0].get_annotations('regex')[10].to_dict())
 ```python
 display_annotations(chunk[0], ['regex'])
 ```
-
-
 
 
 ## Existing annotators

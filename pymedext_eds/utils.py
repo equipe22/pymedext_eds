@@ -1,7 +1,9 @@
+from pymedextcore.document import Document
 
 import functools
 import time
 from logzero import logger
+
 
 def timer(func):
     """Print the runtime of the decorated function"""
@@ -31,3 +33,17 @@ def to_chunks(lst, n):
     for i in range(0,len(lst), n):
         res.append(lst[i:i+n])
     return res
+
+def rawtext_loader(file): 
+    with open(file) as f:
+        txt = f.read()
+        ID = re.search("([A-Za-z0-9]+)\.txt$", file)
+        if not ID:
+            ID = file
+        else:
+            ID  = ID.groups()[0]
+    return Document(
+        raw_text = txt,
+        ID = ID,
+        attributes = {'person_id': ID}
+    )
