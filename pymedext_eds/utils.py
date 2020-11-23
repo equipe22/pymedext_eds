@@ -3,7 +3,7 @@ from pymedextcore.document import Document
 import functools
 import time
 from logzero import logger
-
+import re
 
 def timer(func):
     """Print the runtime of the decorated function"""
