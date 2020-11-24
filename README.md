@@ -1,6 +1,6 @@
-# Pymedext annotators for the EDS pipeline 
+# Pymedext annotators for the EDS pipeline
 
-## Installation 
+## Installation
 
 Requires the installation of PyMedExt_core [PyMedExt_core](https://github.com/equipe22/pymedext_core)
 It can be done using `requirements.txt`
@@ -9,7 +9,7 @@ It can be done using `requirements.txt`
 pip install -r requirements.txt
 ```
 
-Installation via pip: 
+Installation via pip:
 
 ```bash
 pip install git+git://github.com/equipe22/pymedext_eds.git@master#egg=pymedext_eds
@@ -33,12 +33,12 @@ All the annotators are defined in the pymedext_eds.annotators module. You will f
 from pymedext_eds.utils import rawtext_loader
 
 from pymedext_eds.annotators import Endlines, SentenceTokenizer, \
-                                    RegexMatcher, Pipeline 
+                                    RegexMatcher, Pipeline
 
 from pymedext_eds.viz import display_annotations
 ```
 
-- Load documents: 
+- Load documents:
 
 ```python
 data_path = pkg_resources.resource_filename('pymedext_eds', 'data/demo')
@@ -46,7 +46,7 @@ file_list = glob(data_path + '/*.txt')
 docs = [rawtext_loader(x) for x in file_list]
 ```
 
-- Declare the pipeline: 
+- Declare the pipeline:
 
 ```python
 endlines = Endlines(['raw_text'], 'endlines', 'endlines:v1')
@@ -78,43 +78,43 @@ display_annotations(chunk[0], ['regex'])
 
 ## Existing annotators
 
-- Endlines: 
-    - Used to clean the text when using text extracted from PDFs. Removes erroneous endlines introduced by pdf to text conversion. 
+- Endlines:
+    - Used to clean the text when using text extracted from PDFs. Removes erroneous endlines introduced by pdf to text conversion.
     - input : raw_text
     - output: Annotations
-- SectionSplitter: 
+- SectionSplitter:
     - Segments the text into sections
     - output: Annotations
-- SentenceTokenizer: 
+- SentenceTokenizer:
     - Tokenize the text in sentences
     - input: cleaned text from Endlines or sections
     - output: Annotations
-- Hypothesis: 
+- Hypothesis:
     - Classification of sentences regarding the degree of certainty
-    - input: sentences 
+    - input: sentences
     - output: Attributes
-- ATCDFamille: 
+- ATCDFamille:
     - Classification of sentences regarding the subject (patient or family)
-    - input: sentences 
+    - input: sentences
     - output: Attributes
-- SyntagmeTokenizer: 
+- SyntagmeTokenizer:
     - Segmentation of sentences into syntagms
     - input: sentences
     - output: Annotations
-- Negation: 
+- Negation:
     - Classification of syntagms according to the polarity
     - input: syntagm
     - output: Attributes
-- RegexMatcher: 
+- RegexMatcher:
     - Extracts informations using predefined regexs
     - input: sentence or syntagm
     - output: Annotations
-- QuickUMLSAnnotator: 
+- QuickUMLSAnnotator:
     - Extracts medical concepts from UMLS using [QuickUMLS](https://github.com/Georgetown-IR-Lab/QuickUMLS)
     - output: Annotations
 - MedicationAnnotator:
     - Extracts medications informations using a deep learning pipeline
-    - output: Annotations 
+    - output: Annotations
 
 
 ## Run a simple server
@@ -145,27 +145,30 @@ app=Flask(__name__)
 @app.route('/annotate',methods = ['POST'])
 def result():
     if request.method == 'POST':
-        
+
         return pipeline.__call__(request)
-        
+
 if __name__ == '__main__':
     app.run(port = 6666, debug=True)
 ```
 
-Save this code in `demo_flask_server.py` and run it using: 
+Save this code in `demo_flask_server.py` and run it using:
 
 ```bash
 python demo_flask_server.py
 ```
 
-### Query the server: 
+### Query the server:
 
 ```python
 import requests
 from pymedextcore.document import Document
 
+data_path = pkg_resources.resource_filename('pymedext_eds', 'data/demo')
+file_list = glob(data_path + '/*.txt')
+docs = [rawtext_loader(x) for x in file_list]
 
-json_doc = [doc.to_dict() for doc in chunk]
+json_doc = [doc.to_dict() for doc in docs]
 res =  requests.post(f"http://127.0.0.1:6666/annotate", json = json_doc)
 if res.status_code == 200:
     res = res.json()['result']
