@@ -186,19 +186,10 @@
     },
     {
         "id_regexp": "id_regexp_imc",
-        "index_extract": "3",
+        "index_extract": "4",
         "libelle": "IMC,BMI",
         "list_cui": "C1305855",
-        "regexp": "[^a-z](IMC|BMI) *(est *de|de|=|:)? *([0-9]+[,.]?[0-9]*)[^\\/]",
-        "regexp_exclude": "",
-        "version": "v2"
-    },
-    {
-        "id_regexp": "id_regexp_bmi",
-        "index_extract": "3",
-        "libelle": "IMC,BMI",
-        "list_cui": "C1305855",
-        "regexp": "[^a-z](IMC|BMI) *(est *de|de|=|:)? *([0-9]+[,.]?[0-9]*)[^\\/]",
+        "regexp": "(^|[^a-z])(IMC|BMI) *(est *de|de|=|:)? *([0-9]+[,.]?[0-9]*)[^\\/]?",
         "regexp_exclude": "",
         "version": "v2"
     },
