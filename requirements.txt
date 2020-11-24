@@ -1,7 +1,7 @@
 git+git://github.com/equipe22/pymedext_core.git@master#egg=pymedextcore
 flashtext
 pandas
-sentencepiece
+sentencepiece==0.1.91
 unidecode
 numpy
 nltk
