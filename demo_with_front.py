@@ -30,7 +30,7 @@ def base():
 def result():
     if request.method == 'POST':
 
-        res = pipeline.__call__(request)
+        res = pipeline(request)
         docs = [Document.from_dict(doc) for doc in res['result'] ]
         pprint([x.to_dict() for x in docs[0].get_annotations('regex')])
         return {'html': display_annotations(docs[0], ['regex'], attributes = ['context','negation'], jupyter=False ), 'json' : docs[0].to_dict()}
