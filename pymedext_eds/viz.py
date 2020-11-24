@@ -4,7 +4,7 @@ import re
 # def get_dict_annotations(document, _type, source_id = None, target_id = None):
 #         res = []
 #         for anno in document.annotations:
-#             if source_id is not None: 
+#             if source_id is not None:
 #                 if anno.source_ID != source_id:
 #                     continue
 #             if target_id is not None:
@@ -24,22 +24,24 @@ def convert_to_displacy(document, entity_type, attributes, label_key = 'label'):
         for annot in annots:
             if label_key in annot.attributes.keys():
                 label = annot.attributes[label_key]
-            else: 
+            else:
                 label = entity_type.upper()
             if attributes is not None:
-                for att, val in annot.attributes.items(): 
+                for att, val in annot.attributes.items():
                     if att in attributes:
                         label += f'/{val}'
             ents.append({"start": annot.span[0], 'end':annot.span[1], "label": label})
             drug_id = annot.ID
-            
-    return ents
+
+
+
+    return sorted(ents, key = lambda i: i['start'])
 
 
 
 
 def display_annotations(document,  entities = ["ENT/DRUG", "ENT/DOSE"], attributes = None,
-                        palette = [ '#ffb3ba','#ffdfba','#ffffba','#baffc9','#bae1ff'], 
+                        palette = [ '#ffb3ba','#ffdfba','#ffffba','#baffc9','#bae1ff'],
                        label_key = 'label', jupyter = True):
 
     to_disp = []
@@ -51,13 +53,13 @@ def display_annotations(document,  entities = ["ENT/DRUG", "ENT/DOSE"], attribut
 
     tmp['text'] = document.annotations[1].value
     tmp['uuid'] = 0
-    
+
     tmp['text'] = re.sub('\. ', '\n ', tmp['text'])
-     
+
     options = {"colors" : {}}
     i = 0
-    for entity in entities: 
+    for entity in entities:
         options['colors'][entity.upper()] = palette[i]
         i += 1
 
-    displacy.render(tmp, manual=True, style = 'ent', options = options , jupyter=jupyter)
+    return displacy.render(tmp, manual=True, style = 'ent', options = options , jupyter=jupyter, minify=True)
