@@ -22,14 +22,15 @@ def convert_to_displacy(document, entity_type, attributes, label_key = 'label'):
         annots = document.get_annotations(entity_type)
         ents= []
         for annot in annots:
-            if label_key in annot.attributes.keys():
-                label = annot.attributes[label_key]
-            else:
-                label = entity_type.upper()
-            if attributes is not None:
-                for att, val in annot.attributes.items():
-                    if att in attributes:
-                        label += f'/{val}'
+            # if label_key in annot.attributes.keys():
+            #     label = annot.attributes[label_key]
+            # else:
+            #     label = entity_type.upper()
+            # if attributes is not None:
+            #     for att, val in annot.attributes.items():
+            #         if att in attributes:
+            #             label += f'/{val}'
+            label = entity_type.upper()
             ents.append({"start": annot.span[0], 'end':annot.span[1], "label": label})
             drug_id = annot.ID
 
