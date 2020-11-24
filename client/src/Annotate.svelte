@@ -1,8 +1,8 @@
 <script>
 let response;
-let result_json = null;
+let result_json;
 export let doc;
-export let result = null;
+export let result;
 export let txt = `
 pas d'embolie pulmonaire.
 
@@ -71,10 +71,18 @@ pre {
 </style>
 
 <div>
-  <textarea rows='20' bind:value={txt} /><br>
+  <textarea rows='20' bind:value={txt} on:input={handleAnnotate} /><br>
   <button on:click={handleAnnotate}>Annotate</button>
+  {#await response}
+  <p>annotating...</p>
+  {:then}
   <h2>Results</h2>
   <p class='result'>{@html result}</p><br><br>
   <h2> JSON </h2>
   <pre> {result_json}</pre>
+  {:catch error}
+  <p style="color: red">{error.message}</p>
+  {/await}
+
+
 </div>
