@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 __pycache__
 data/quickumls_files/*
+.DS_Store
+data/apmed*

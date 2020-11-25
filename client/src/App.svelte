@@ -1,10 +1,6 @@
 <script>
-
 //	import Random from './Random.svelte';
 	import Annotate from './Annotate.svelte';
-
-
-
 </script>
 
 <main>
@@ -12,7 +8,6 @@
 	<h2>this demo uses the following pipeline : [endlines, sentences, family, syntagmes, negation, regex]</h2>
 	<p>You can type your own text and click the annotate button to see the results</p>
 	<Annotate />
-
 </main>
 
 <style>

@@ -11,8 +11,6 @@ antécédent d'infarctus chez le père.
 poids: 67 kg, taille: 1m75, BMI: 45
 `;
 
-$: console.log(JSON.stringify(result_json))
-
 $: doc= {
   'annotations' : [{'type': 'raw_text',
                     'value': txt,
@@ -40,7 +38,6 @@ result = response['html']
 result_json = JSON.stringify(response['json'], undefined, 2)
 
 }
-
 
 function handleAnnotate() {
     doPost()
