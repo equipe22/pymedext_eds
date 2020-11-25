@@ -42,10 +42,10 @@ result_json = JSON.stringify(response['json'], undefined, 2)
 function handleAnnotate() {
     doPost()
   }
+
 </script>
 
 <style>
-
 textarea {
   height: auto;
   width: 80%;
@@ -63,9 +63,8 @@ pre {
   padding-top: 2em;
   text-align: left;
 }
-
-
 </style>
+
 
 <div>
   <textarea rows='20' bind:value={txt} on:input={handleAnnotate} /><br>
@@ -80,6 +79,4 @@ pre {
   {:catch error}
   <p style="color: red">{error.message}</p>
   {/await}
-
-
 </div>
