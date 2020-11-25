@@ -1,4 +1,4 @@
-git+git://github.com/equipe22/pymedext_core.git@master#egg=pymedextcore
+git+git://github.com/equipe22/pymedext_core.git@v0.1#egg=pymedextcore
 flashtext
 pandas
 sentencepiece==0.1.91
