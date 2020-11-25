@@ -8,14 +8,15 @@ from pymedext_eds.annotators import Endlines, SentenceTokenizer, Hypothesis, \
                                     Pipeline, QuickUMLSAnnotator
 from pymedext_eds.viz import display_annotations
 from pymedextcore.document import Document
+from pymedext_eds.utils import get_version_git
 
-endlines = Endlines(['raw_text'], 'endlines', 'endlines:v1')
-sentences = SentenceTokenizer(['endlines'], 'sentence', 'sentenceTokenizer:v1')
+endlines = Endlines(['raw_text'], 'endlines', get_version_git('EndLines'))
+sentences = SentenceTokenizer(['endlines'], 'sentence', get_version_git('SentenceTokenizer'))
 #hypothesis = Hypothesis(['sentence'], 'hypothesis', 'hypothesis:v1')
-family = ATCDFamille(['sentence'], 'context', 'ATCDfamily:v1')
-syntagmes = SyntagmeTokenizer(['sentence'], 'syntagme', 'SyntagmeTokenizer:v1')
-negation = Negation(['syntagme'], 'negation', 'Negation:v1')
-regex = RegexMatcher(['endlines','syntagme'], 'regex', 'RegexMatcher:v1', 'list_regexp.json')
+family = ATCDFamille(['sentence'], 'context', get_version_git('ATCDFamille'))
+syntagmes = SyntagmeTokenizer(['sentence'], 'syntagme', get_version_git('SyntagmeTokenizer'))
+negation = Negation(['syntagme'], 'negation', get_version_git(' Negation'))
+regex = RegexMatcher(['endlines','syntagme'], 'regex', get_version_git('RegexMatcher'), 'list_regexp.json')
 # umls = QuickUMLSAnnotator(['syntagme'], 'umls', 'QuickUMLS:2020AB',
 #                           quickumls_fp='data/quickumls_files/',
 #                             overlapping_criteria='length',
@@ -47,4 +48,12 @@ def result():
                 'json' : docs[0].to_dict()}
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type = int, help="Port", default = 5000)
+    parser.add_argument("--debug", help="debug mode", action="store_true" )
+
+    args = parser.parse_args()
+    app.run(port=args.port,
+            debug=args.debug)
