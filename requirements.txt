@@ -17,3 +17,4 @@ quickumls
 ray
 pydantic==1.6
 logzero
+gitpython

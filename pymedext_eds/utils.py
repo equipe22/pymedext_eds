@@ -1,4 +1,5 @@
 from pymedextcore.document import Document
+from git import Repo,InvalidGitRepositoryError
 
 import functools
 import time
@@ -47,3 +48,12 @@ def rawtext_loader(file):
         ID = ID,
         attributes = {'person_id': ID}
     )
+
+def get_version_git(annotator, 
+                    repo_name="equipe22/pymedext_eds"):
+    try: 
+        repo = Repo()
+        commit = repo.commit('master').hexsha
+        return f"{annotator}:{repo_name}:{commit}"
+    except InvalidGitRepositoryError:
+        return None
