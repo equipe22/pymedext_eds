@@ -1,10 +1,11 @@
-from pymedextcore.document import Document
-from git import Repo,InvalidGitRepositoryError
-
 import functools
 import time
-from logzero import logger
 import re
+from logzero import logger
+
+from pymedextcore.document import Document
+from pymedextcore.annotators import Attribute
+from git import Repo,InvalidGitRepositoryError
 
 def timer(func):
     """Print the runtime of the decorated function"""
@@ -19,39 +20,46 @@ def timer(func):
     return wrapper_timer
 
 
-def chunks(lst, n):
+def chunks(lst, n_chunks):
     """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+    for i in range(0, len(lst), n_chunks):
+        yield lst[i:i + n_chunks]
 
 
-def to_chunks(lst, n):
+def to_chunks(lst, n_chunks):
     """List of sublists of size n form lst
     :param lst: List
     :param n: Integer
     :returns: List"""
     res = []
-    for i in range(0,len(lst), n):
-        res.append(lst[i:i+n])
+    for i in range(0,len(lst), n_chunks):
+        res.append(lst[i:i+n_chunks])
     return res
 
-def rawtext_loader(file): 
+def rawtext_loader(file):
+    """ Loads documents from text file
+    :param file: path to a text file
+    """
     with open(file) as f:
         txt = f.read()
-        ID = re.search("([A-Za-z0-9]+)\.txt$", file)
-        if not ID:
-            ID = file
+        _id = re.search(r"([A-Za-z0-9]+)\.txt$", file)
+        if not _id:
+            _id = file
         else:
-            ID  = ID.groups()[0]
+            _id  = _id.groups()[0]
     return Document(
         raw_text = txt,
-        ID = ID,
-        attributes = {'person_id': ID}
+        ID = _id,
+        attributes = [Attribute(type='person_id', value=_id)]
     )
 
-def get_version_git(annotator, 
+def get_version_git(annotator,
                     repo_name="equipe22/pymedext_eds"):
-    try: 
+    """Get the git commit hash corresponding to the version of the annotator
+    params: annotator: Name of the annotators
+    params: repo_name: Name of the github repo
+    """
+    try:
         repo = Repo()
         commit = repo.commit('master').hexsha
         return f"{annotator}:{repo_name}:{commit}"
