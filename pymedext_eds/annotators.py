@@ -1,10 +1,11 @@
-from pymedextcore.annotators import Annotation, Annotator
-from pymedextcore.document import Document
-import glob
 import re
 import json
-from flashtext import KeywordProcessor
 import pandas as pd
+from pymedextcore.annotators import Annotation, Annotator, Attribute
+from pymedextcore.document import Document
+from flashtext import KeywordProcessor
+from .constants import SECTION_DICT
+from .verbs import verbs_list
 
 try:
     from quickumls import QuickUMLS
@@ -13,20 +14,23 @@ except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
 
 
-from .constants import SECTION_DICT
-from .verbs import verbs_list
+
 
 
 class Pipeline:
+    """Pipeline class"""
+
     def __init__(self, pipeline):
         self.pipeline = pipeline
 
     def annotate(self, docs):
+        """annotate docs using defined pipeline"""
         for doc in docs:
             doc.annotate(self.pipeline)
         return [doc.to_dict() for doc in docs]
 
     def process(self, payload):
+        """processes a request payload"""
         docs = [Document.from_dict(doc) for doc in payload ]
         return self.annotate(docs)
 
@@ -47,7 +51,7 @@ class Endlines(Annotator):
 
         txt = re.sub(r"CONCLUSIONS?([A-Za-z])",r"CONCLUSION \1", txt,re.IGNORECASE)
 
-        phrases = re.split(r'([\r\n;\?!.])', txt)
+        #phrases = re.split(r'([\r\n;\?!.])', txt)
 
         return([Annotation(
             type = self.key_output,
@@ -59,8 +63,8 @@ class Endlines(Annotator):
 
     @staticmethod
     def preprocess(txt):
-        txt = re.sub("\r"," ", txt)
-        txt = re.sub("\[pic\]"," ", txt)
+        txt = re.sub(r"\r"," ", txt)
+        txt = re.sub(r"\[pic\]"," ", txt)
         return txt
 
     @staticmethod
@@ -119,19 +123,6 @@ class Endlines(Annotator):
         return txt
 
 
-    @staticmethod
-    def gerer_parenthese(txt):
-        txt=re.sub(r"\(-\)"," negatif ",txt)
-        txt=re.sub(r"\(\+\)"," positif ",txt)
-
-        # si plus de 30 caractères on met le contenu de la parenthese à la fin de la phrase
-        txt=re.sub(r"\(([^)(]{30,5000})\)([^.]*)([\.])",r" \2 ; \1 \3",txt)
-
-        # si entre 1 et 30 caractères on met des virgules  à la place des parentheses
-        txt=re.sub(r"\(([^)(]{1,29})\)",r",\1 , ",txt)
-        return txt
-
-
 class SentenceTokenizer(Annotator):
 
     def annotate_function(self, _input):
@@ -174,10 +165,8 @@ class Hypothesis(Annotator):
         super().__init__(key_input, key_output, ID)
         self.verbs_hypo, self.verbs_all = self.load_verbs()
 
-    def load_verbs(self):
-        #with open(json_file) as f:
-        #    json_verbs = json.load(f)
-
+    @staticmethod
+    def load_verbs():
         verbs_hypo = []
         verbs_all = []
         for verb in verbs_list:
@@ -198,36 +187,36 @@ class Hypothesis(Annotator):
 
         if len(phrase) > 150:
             return 'certain'
-        else:
-            phrase_low = phrase.lower()
-            sentence_array = re.split(r'[^\w0-9.\']+', phrase_low)
 
-            inter_hypo = list(set(self.verbs_hypo) & set(sentence_array))
+        phrase_low = phrase.lower()
+        sentence_array = re.split(r'[^\w0-9.\']+', phrase_low)
 
-            if len(inter_hypo) > 0 :
-                return 'hypothesis'
-            else:
-                if ((re.findall(r'\bsi\b' , phrase_low) != []) & \
-                    (re.findall(r'\bsi\s+oui\b', phrase_low) == []) & \
-                    (re.findall(r'\bm[eê]me\s+si\b',phrase_low) == []))  | \
-                   (re.findall( r'\b[àa]\s+condition\s+que\b' , phrase_low) != []) | \
-                   (re.findall( r'\b[àa]\s+moins\s+que\b' , phrase_low) != []) | \
-                   (re.findall( r'\bpour\s+peu\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\bsi\s+tant\s+est\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\bpour\s+autant\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\ben\s+admettant\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\b[àa]\s+supposer\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\ben\s+supposant\s+que\b' , phrase_low) != []) | \
-                    (re.findall( r'\bau\s+cas\s+o[uù]\b' , phrase_low) != []) | \
-                    (re.findall( r'\b[ée]ventuellement\b' , phrase_low) != []) | \
-                    (re.findall( r'\bsuspicion\b' , phrase_low) != []) | \
-                    ((re.findall( r'\bsuspect[ée]e?s?\b' , phrase_low) != []) & \
-                      (re.findall( r'\bconfirm[ée]e?s?\b' , phrase_low) == [])) | \
-                    (re.findall( r'\benvisag[eé]e?s?r?\b' , phrase_low) != []):
+        inter_hypo = list(set(self.verbs_hypo) & set(sentence_array))
 
-                    return 'hypothesis'
-                else:
-                    return 'certain'
+        if len(inter_hypo) > 0 :
+            return 'hypothesis'
+
+        if ((re.findall(r'\bsi\b' , phrase_low) != []) & \
+            (re.findall(r'\bsi\s+oui\b', phrase_low) == []) & \
+            (re.findall(r'\bm[eê]me\s+si\b',phrase_low) == []))  | \
+           (re.findall( r'\b[àa]\s+condition\s+que\b' , phrase_low) != []) | \
+           (re.findall( r'\b[àa]\s+moins\s+que\b' , phrase_low) != []) | \
+           (re.findall( r'\bpour\s+peu\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\bsi\s+tant\s+est\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\bpour\s+autant\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\ben\s+admettant\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\b[àa]\s+supposer\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\ben\s+supposant\s+que\b' , phrase_low) != []) | \
+            (re.findall( r'\bau\s+cas\s+o[uù]\b' , phrase_low) != []) | \
+            (re.findall( r'\b[ée]ventuellement\b' , phrase_low) != []) | \
+            (re.findall( r'\bsuspicion\b' , phrase_low) != []) | \
+            ((re.findall( r'\bsuspect[ée]e?s?\b' , phrase_low) != []) & \
+              (re.findall( r'\bconfirm[ée]e?s?\b' , phrase_low) == [])) | \
+            (re.findall( r'\benvisag[eé]e?s?r?\b' , phrase_low) != []):
+
+            return 'hypothesis'
+
+        return 'certain'
 
     def annotate_function(self, _input):
 
@@ -236,11 +225,10 @@ class Hypothesis(Annotator):
         res = []
 
         for sent in inp:
-
-            if sent.attributes is None:
-                sent.attributes = {}
-            sent.attributes[self.key_output] = self.detect_hypothesis(sent.value)
-
+            sent.add_attribute(Attribute(type=self.key_output,
+                                             value=self.detect_hypothesis(sent.value),
+                                             source = self.ID,
+                                             source_ID= sent.ID))
 #             res.append(Annotation(
 #                 type = self.key_output,
 #                 value = self.detect_hypothesis(sent.value),
@@ -298,8 +286,8 @@ class ATCDFamille(Annotator):
             (re.findall(r"\bterrain *familial",phrase_low) != []) :
 
             return 'family'
-        else:
-            return 'patient'
+
+        return 'patient'
 
 
     def annotate_function(self, _input):
@@ -310,9 +298,16 @@ class ATCDFamille(Annotator):
 
         for sent in inp:
 
-            if sent.attributes is None:
-                sent.attributes = {}
-            sent.attributes[self.key_output] = self.detect_antecedent_famille(sent.value)
+            sent.add_attribute(Attribute(type=self.key_output,
+                                             value=self.detect_antecedent_famille(sent.value),
+                                             source = self.ID,
+                                             source_ID= sent.ID))
+            # if sent.attributes is None:
+            #     sent.attributes = []
+            # sent.attributes.append(Attribute(type=self.key_output,
+            #                                  value=self.detect_antecedent_famille(sent.value),
+            #                                  source = self.ID,
+            #                                  source_ID= sent.ID))
 
 #             res.append(Annotation(
 #                 type = self.key_output,
@@ -468,24 +463,21 @@ class Negation(Annotator):
                   (re.findall(r"pas\s+normaux", phrase_low) == []))
                 ):
                 return 'neg'
-            else:
-                return 'aff'
-        else:
+
             return 'aff'
+
+        return 'aff'
 
     def annotate_function(self, _input):
 
         inp = self.get_all_key_input(_input)
 
-        res = []
-
         for syntagme in inp:
+            syntagme.add_attribute(Attribute(type=self.key_output,
+                                             value=self.detect_negation(syntagme.value),
+                                             source = self.ID,
+                                             source_ID= syntagme.ID))
 
-            if syntagme.attributes is None:
-                syntagme.attributes = {}
-            syntagme.attributes[self.key_output] = self.detect_negation(syntagme.value)
-
-        return []
 
 
 
@@ -551,11 +543,21 @@ class RegexMatcher(Annotator):
                 snippet_span = (max(start-snippet_size, 0), min(end+snippet_size, raw.span[1]))
                 snippet_value = raw.value[snippet_span[0]:snippet_span[1]]
 
+                attributes = syntagme.attributes.copy()
+
+                attributes.append(Attribute(type='id_regexp',
+                                            value=rex['id_regexp'],
+                                            source = self.ID,
+                                            source_ID = syntagme.ID,
+                                            props= {'version': rex['version'],
+                                                    'label': rex['libelle'],
+                                                    'snippet': snippet_value}))
+
                 res.append(Annotation(
                     type = self.key_output,
                     value = m.group(i),
                     span = (start, end),
-                    attributes = {'version':rex['version'], 'label':rex['libelle'], 'id_regexp' : rex['id_regexp'], 'snippet':snippet_value, **syntagme.attributes},
+                    attributes = attributes,
                     isEntity = True,
                     source = self.ID,
                     source_ID = syntagme.ID
@@ -611,16 +613,27 @@ class QuickUMLSAnnotator(Annotator):
             ents = self.match(sent.value)
 
             if sent.attributes is None:
-                sent.attributes = {}
+                sent.attributes = []
+
+            attributes = sent.attributes.copy()
 
             for ent in ents:
 
-                ent_attr = {'cui':ent[0]['cui'],
-                           'label': ent[0]['term'],
-                           'semtypes': list(ent[0]['semtypes']),
-                           'score': ent[0]['similarity'],
-                            'snippet': sent.value
-                           }
+                entity_attributes = [Attribute(type='cui',
+                                               value = ent[0]['cui'],
+                                               source=self.ID,
+                                               source_ID=sent.ID,
+                                               props={'label': ent[0]['term'],
+                                                      'semtypes': list(ent[0]['semtypes']),
+                                                      'score': ent[0]['similarity'],
+                                                       'snippet': sent.value})]
+
+                # ent_attr = {'cui':ent[0]['cui'],
+                #            'label': ent[0]['term'],
+                #            'semtypes': list(ent[0]['semtypes']),
+                #            'score': ent[0]['similarity'],
+                #             'snippet': sent.value
+                #            }
 
                 start = sent.span[0] + ent[0]['start']
                 end = sent.span[0] + ent[0]['end']
@@ -631,7 +644,7 @@ class QuickUMLSAnnotator(Annotator):
                     span = (start, end),
                     source = self.ID,
                     source_ID = sent.ID,
-                    attributes = {**sent.attributes.copy() , **ent_attr}
+                    attributes = attributes + entity_attributes
                 ))
 
         return res
@@ -639,12 +652,17 @@ class QuickUMLSAnnotator(Annotator):
 
 
 class SectionSplitter(Annotator):
-    def __init__(self, key_input, key_output, ID, section_dict = SECTION_DICT):
+    def __init__(self, key_input, key_output, ID, section_dict = None):
 
         super().__init__(key_input, key_output, ID)
 
+        if section_dict is None:
+            self.section_dict = SECTION_DICT
+        else:
+            self.section_dict = section_dict
+
         self.keyword_processor = KeywordProcessor(case_sensitive=True)
-        self.keyword_processor.add_keywords_from_dict(section_dict)
+        self.keyword_processor.add_keywords_from_dict(self.section_dict)
         self.head_before_treat = [ "histoire", "evolution"]
 
     def annotate_function(self, _input):
@@ -668,14 +686,18 @@ class SectionSplitter(Annotator):
 
 
         if inp.attributes is None:
-            attributes = {}
+            attributes = []
         else:
             attributes = inp.attributes.copy()
 
-        for index, row in match.iterrows():
+        for _ , row in match.iterrows():
 
             att = attributes.copy()
-            att[self.key_output] = row['match_type']
+            att.append(Attribute(type = self.key_output,
+                                 value=row['match_type'],
+                                 source= self.ID,
+                                 source_ID=inp.ID))
+            #att[self.key_output] = row['match_type']
 
             res.append(Annotation(
                 type = self.key_output,
