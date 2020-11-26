@@ -18,6 +18,8 @@ RUN pip3 install git+https://github.com/equipe22/pymedext_core.git
 WORKDIR /home/src
 RUN git clone https://github.com/equipe22/pymedext_eds.git
 WORKDIR /home/src/pymedext_eds
+RUN apt-get install -y python3-dev libevent-dev
+RUN pip3 install --upgrade pip setuptools wheel
 RUN pip3 install -r requirements.txt
 RUN pip3 install git+https://github.com/equipe22/pymedext_eds.git@master#egg=pymedext_eds
 
@@ -31,4 +33,4 @@ RUN rm /root/.git-credentials
 # COPY bin/installstopword.py .
 # RUN python3 installstopword.py
 expose 6666
-CMD ["python3", " demo_flask.py "]
+CMD ["python3", " /home/src/eds_app/demo_flask.py "]

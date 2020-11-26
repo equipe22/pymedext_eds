@@ -174,3 +174,39 @@ if res.status_code == 200:
     res = res.json()['result']
     docs = [Document.from_dict(doc) for doc in res ]
 ```
+
+## Run a docker server
+
+### define the git credentials
+first create a file .git-credentials and replace user and pass by your
+github credentials such has
+
+``` bash
+https://user:pass@github.com
+```
+
+WARNING :never add it on the git !!!
+
+### build the images
+
+```bash
+
+docker build -f eds_apps/Dockerfile_backend -t pymedext-eds:v1 .
+
+
+#if proxy add
+docker build -f eds_apps/Dockerfile_backend -t pymedext-eds:v1 \
+--buildargs http_proxy="proxy" \
+--buildargs https_proxy="proxy" .
+
+
+```
+
+### start the backend server
+
+``` bash
+
+docker run --rm  -d -p 6666:6666 pymedext-eds:v1 python3 demo_flask.py
+
+```
+
