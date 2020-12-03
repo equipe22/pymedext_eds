@@ -3,15 +3,15 @@
     {
         "icd10": "I25",
         "id_regexp": "id_regexp_infarct",
-        "libelle": "Infarctus, IDM, myocarde, cardiopathie isch\u00e9mique, angor, angine de poitrine",
+        "libelle": "Infarctus, IDM, myocarde, cardiopathie ischémique, angor, angine de poitrine",
         "list_cui": "C0027051,C0349782,C0340288",
         "refresh": "false",
-        "regexp": "infarctus|[^a-z]IDM[^a-z]|infarctus.{0,5}du.{0,5}myocarde|cardiopathie.{0,5}isch[e\u00e9\u00e8]mique|[^a-z]angor[^a-z]|angine.{0,5}de.{0,5}poitrine|crise.{0,5}cardiaque|syndrome *coronarien *aigu",
-        "regexp_exclude": "infarctus +pulmonaire|infarctus +c[\u00e9e]r[\u00e9e]bral|AVC *avec *infarctus|infarctus *spl[\u00e9e]nique|petit *infarctus",
-        "regexp_exclude_v1": "infractus +pulmonaire|infarctus +c[\u00e9e]r[\u00e9e]bral|AVC *avec *infarctus|infarctus *spl[\u00e9e]nique|petit *infarctus",
+        "regexp": "infarctus|[^a-z]IDM[^a-z]|infarctus.{0,5}du.{0,5}myocarde|cardiopathie.{0,5}isch[eéè]mique|[^a-z]angor[^a-z]|angine.{0,5}de.{0,5}poitrine|crise.{0,5}cardiaque|syndrome *coronarien *aigu",
+        "regexp_exclude": "infarctus +pulmonaire|infarctus +c[ée]r[ée]bral|AVC *avec *infarctus|infarctus *spl[ée]nique|petit *infarctus",
+        "regexp_exclude_v1": "infractus +pulmonaire|infarctus +c[ée]r[ée]bral|AVC *avec *infarctus|infarctus *spl[ée]nique|petit *infarctus",
         "regexp_exclude_v2": "",
         "regexp_v1": "infarctu.|[^a-z]IDM[^a-z]|infarctu.{0,5}du.{0,5}myocarde|cardiopathie.{0,5}isch.mique|[^a-z]angor[^a-z]|angine.{0,5}de.{0,5}poitrine|crise.{0,5}cardiaque",
-        "regexp_v2": "(?<!(AVC avec ))(?<!petit )infarctus(?!( *pulmonaire))(?!( *c[\u00e9e]r[\u00e9e]bral))(?!( *spl[\u00e9e]nique))|[^a-z]IDM[^a-z]|infarctu.{0,5}du.{0,5}myocarde|cardiopathie.{0,5}isch.mique|[^a-z]angor[^a-z]|angine.{0,5}de.{0,5}poitrine|crise.{0,5}cardiaque",
+        "regexp_v2": "(?<!(AVC avec ))(?<!petit )infarctus(?!( *pulmonaire))(?!( *c[ée]r[ée]bral))(?!( *spl[ée]nique))|[^a-z]IDM[^a-z]|infarctu.{0,5}du.{0,5}myocarde|cardiopathie.{0,5}isch.mique|[^a-z]angor[^a-z]|angine.{0,5}de.{0,5}poitrine|crise.{0,5}cardiaque",
         "version": "v2"
     },
     {
@@ -62,7 +62,7 @@
         "index_extract": "",
         "libelle": "retinopathie",
         "list_cui": "",
-        "regexp": "r[\u00e9e]tinopathie",
+        "regexp": "r[ée]tinopathie",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -84,7 +84,7 @@
         "index_extract": "",
         "libelle": "encephalopathie",
         "list_cui": "",
-        "regexp": "enc[\u00e9e]phalopathie",
+        "regexp": "enc[ée]phalopathie",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -93,9 +93,9 @@
         "filtre_document": "",
         "id_regexp": "id_regexp_insrenchronique",
         "index_extract": "",
-        "libelle": "Insuffisance r\u00e9nale chronique",
+        "libelle": "Insuffisance rénale chronique",
         "list_cui": "",
-        "regexp": "Insuffisance *r[\u00e9e]nale *chronique",
+        "regexp": "Insuffisance *r[ée]nale *chronique",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -104,9 +104,9 @@
         "filtre_document": "",
         "id_regexp": "id_regexp_insrenaigue",
         "index_extract": "",
-        "libelle": "Insuffisance r\u00e9nale aigu\u00eb",
+        "libelle": "Insuffisance rénale aiguë",
         "list_cui": "",
-        "regexp": "Insuffisance *r[\u00e9e]nale *aigu[\u00ebe]",
+        "regexp": "Insuffisance *r[ée]nale *aigu[ëe]",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -117,7 +117,7 @@
         "index_extract": "2",
         "libelle": "Scanner pulmonaire conclusion covid ",
         "list_cui": "",
-        "regexp": "(Aspect *TDM|Scanner) *(typique|compatible|(non|tr[e\u00e9\u00e8]s)? *[e\u00e9\u00e8]vocateur)",
+        "regexp": "(Aspect *TDM|Scanner) *(typique|compatible|(non|tr[eéè]s)? *[eéè]vocateur)",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -135,10 +135,10 @@
     {
         "icd10": "E10-E14",
         "id_regexp": "id_regexp_diabete",
-        "libelle": "Diab\u00e8te",
+        "libelle": "Diabète",
         "list_cui": "C0011849",
-        "regexp": "(?<!pre)(?<!pre.)diab[\u00e9e]te|[^a-z]DID[^a-z]|[^a-z]DNID[^a-z]|diab[\u00e9e]tique",
-        "regexp_exclude": "diab[\u00e9e]te *insipide|diab[\u00e9e]te *gestationnel|diab[\u00e9e]te:[.]",
+        "regexp": "(?<!pre)(?<!pre.)diab[ée]te|[^a-z]DID[^a-z]|[^a-z]DNID[^a-z]|diab[ée]tique",
+        "regexp_exclude": "diab[ée]te *insipide|diab[ée]te *gestationnel|diab[ée]te:[.]",
         "version": "v2"
     },
     {
@@ -146,15 +146,15 @@
         "index_extract": "",
         "libelle": "HTA",
         "list_cui": "C1305855",
-        "regexp": "[^A-Z]HTA[^A-Z]|hyperten[st]ion.{0,5}art[e\u00e9]rielle|hyperten[st]ion.{0,5}[e\u00e9]s{1,2}entiel{1,2}.",
+        "regexp": "[^A-Z]HTA[^A-Z]|hyperten[st]ion.{0,5}art[eé]rielle|hyperten[st]ion.{0,5}[eé]s{1,2}entiel{1,2}.",
         "regexp_exclude": "HTA:[.]",
         "version": "v2"
     },
     {
         "id_regexp": "id_regexp_dyslpidemie",
-        "libelle": "Dyslipid\u00e9mies\u00a0",
+        "libelle": "Dyslipidémies",
         "list_cui": "C0242339",
-        "regexp": "dyslipid.mi.?|hyperlipid.mi.?|hyper.{0,5}cholest.rol.mi.?|cholest.rol.{0,5}[\u00e9e]l[\u00e9e]v[\u00e9e]|hypertriglyc.rid.mi.?|triglyc[\u00e9e]rides? +[\u00e9e]lev[\u00e9e]s?",
+        "regexp": "dyslipid.mi.?|hyperlipid.mi.?|hyper.{0,5}cholest.rol.mi.?|cholest.rol.{0,5}[ée]l[ée]v[ée]|hypertriglyc.rid.mi.?|triglyc[ée]rides? +[ée]lev[ée]s?",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -162,7 +162,7 @@
         "comment": "on supprime, synonyme de id_regexp_dyslipidemie",
         "deprecated": "true",
         "id_regexp": "id_regexp_hyperlipidemie",
-        "libelle": "Hyperlipid\u00e9mies\u00a0",
+        "libelle": "Hyperlipidémies",
         "list_cui": "C0020473",
         "regexp": "hyperlipid.mi.?",
         "regexp_exclude": "",
@@ -170,17 +170,17 @@
     },
     {
         "id_regexp": "id_regexp_hypercholesterolemie",
-        "libelle": "Hypercholest\u00e9rol\u00e9mie",
+        "libelle": "Hypercholestérolémie",
         "list_cui": "C0020443",
-        "regexp": "hyper.{0,5}cholest.rol.mi.?|cholest.rol.{0,5}[\u00e9e]l[\u00e9e]v[\u00e9e]",
+        "regexp": "hyper.{0,5}cholest.rol.mi.?|cholest.rol.{0,5}[ée]l[ée]v[ée]",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "id_regexp": "id_regexp_hypertriglyceridemie",
-        "libelle": "Hypertriglyc\u00e9rid\u00e9mies",
+        "libelle": "Hypertriglycéridémies",
         "list_cui": "C0020557",
-        "regexp": "hypertriglyc.rid.mi.?|triglyc[\u00e9e]rides? +[\u00e9e]lev[\u00e9e]s?",
+        "regexp": "hypertriglyc.rid.mi.?|triglyc[ée]rides? +[ée]lev[ée]s?",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -195,18 +195,18 @@
     },
     {
         "id_regexp": "id_regexp_surpoids",
-        "libelle": "Surpoids\u00a0",
+        "libelle": "Surpoids",
         "list_cui": "C0497406",
-        "regexp": "surpoi.{0,2}|surcharge *pond[\u00e9e]rale?",
+        "regexp": "surpoi.{0,2}|surcharge *pond[ée]rale?",
         "regexp_exclude": "",
         "version": "v2"
     },
     {
         "icd10": "E66",
         "id_regexp": "id_regexp_obesite",
-        "libelle": "Ob\u00e9sit\u00e9",
+        "libelle": "Obésité",
         "list_cui": "C0028754",
-        "regexp": "ob[\u00e9e\u00e8]sit[\u00e9e\u00e8]|ob[\u00e8e\u00e9]se",
+        "regexp": "ob[éeè]sit[éeè]|ob[èeé]se",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -214,7 +214,7 @@
     {
         "icd10": "Z95",
         "id_regexp": "id_regexp_stent",
-        "libelle": "pose/pr\u00e9sence stent, endoproth\u00e8se, angioplastie",
+        "libelle": "pose/présence stent, endoprothèse, angioplastie",
         "list_cui": "C0162577,C0190211",
         "regexp": "[^a-z]stents?[^a-z].{0,5}|[ae]ndoproth?.se|[ae]ngioplasti.",
         "regexp_exclude": "",
@@ -242,9 +242,9 @@
         "comment": "attention mm regexp que id_regexp_arretcardiaq",
         "icd10": "R092",
         "id_regexp": "id_regexp_arretresp",
-        "libelle": "Arr\u00eat respiratoire, arr\u00eat cardiaque",
+        "libelle": "Arrêt respiratoire, arrêt cardiaque",
         "list_cui": "C0018790,C0162297",
-        "regexp": "[^a-z]arr?[\u00e9\u00eae]t *respiratoire|[^a-z]arr?[\u00e9\u00eae]t *cardiaque|arr[\u00eae\u00e8\u00e9]t *cardio[^a-z]*respiratoire|[^a-z]ACR[^a-z]",
+        "regexp": "[^a-z]arr?[éêe]t *respiratoire|[^a-z]arr?[éêe]t *cardiaque|arr[êeèé]t *cardio[^a-z]*respiratoire|[^a-z]ACR[^a-z]",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -252,43 +252,43 @@
         "comment": "attention mm regexp que id_regexp_arretresp",
         "icd10": "I46",
         "id_regexp": "id_regexp_arretcardiaq",
-        "libelle": "Arr\u00eat respiratoire, arr\u00eat cardiaque",
+        "libelle": "Arrêt respiratoire, arrêt cardiaque",
         "list_cui": "C0018790,C0162297",
-        "regexp": "[^a-z]arr?[\u00e9\u00eae]t *respiratoire|[^a-z]arr?[\u00e9\u00eae]t *cardiaque|arr[\u00eae\u00e8\u00e9]t *cardio[^a-z]*respiratoire|[^a-z]ACR[^a-z]",
+        "regexp": "[^a-z]arr?[éêe]t *respiratoire|[^a-z]arr?[éêe]t *cardiaque|arr[êeèé]t *cardio[^a-z]*respiratoire|[^a-z]ACR[^a-z]",
         "regexp_exclude": "",
         "version": "v2"
     },
     {
         "icd10": "I5",
         "id_regexp": "id_regexp_insfugcardiaque",
-        "libelle": "Insuffisance cardiaque, d\u00e9faillance cardiaque",
+        "libelle": "Insuffisance cardiaque, défaillance cardiaque",
         "list_cui": "C0018801",
-        "regexp": "insuf{1,}isance.{0,5}cardiaque|d[\u00e9e]faill[ea]nce.{0,5}cardiaque",
+        "regexp": "insuf{1,}isance.{0,5}cardiaque|d[ée]faill[ea]nce.{0,5}cardiaque",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "icd10": "I6",
         "id_regexp": "id_regexp_avc",
-        "libelle": "AVC, accident vasculaire c\u00e9r\u00e9bral, accident isch\u00e9mique c\u00e9r\u00e9bral",
+        "libelle": "AVC, accident vasculaire cérébral, accident ischémique cérébral",
         "list_cui": "C0038454,C0948008",
         "refresh": "false",
-        "regexp": "[^a-z]AVC[^a-z]|acc*ident.{0,5}vasculaire.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,5}isch?[\u00e9e]mique.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,3}h[\u00e9e]morragique.{0,3}c[\u00e9e]r[\u00e9e]bral",
+        "regexp": "[^a-z]AVC[^a-z]|acc*ident.{0,5}vasculaire.{0,5}c[ée]r[ée]bral|acc*ident.{0,5}isch?[ée]mique.{0,5}c[ée]r[ée]bral|acc*ident.{0,3}h[ée]morragique.{0,3}c[ée]r[ée]bral",
         "regexp_exclude": "APHP AVC|UHCD AVC|AVC UNITE",
         "regexp_exclude_v1": "APHP AVC|UHCD AVC|AVC UNITE",
         "regexp_exclude_v2": "",
         "regexp_exclude_v3": "",
-        "regexp_v1": "[^a-z]AVC[^a-z]|acc*ident.{0,5}vasculaire.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,5}isch?[\u00e9e]mique.{0,5}c[\u00e9e]r[\u00e9e]bral",
-        "regexp_v2": "(?<!APHP)(?<!UHCD)[^a-z]AVC[^a-z](?!UNITE)|acc*ident.{0,5}vasculaire.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,5}isch?[\u00e9e]mique.{0,5}c[\u00e9e]r[\u00e9e]bral",
-        "regexp_v3": "(?<!APHP)(?<!UHCD)[^a-z]AVC[^a-z](?!UNITE)|acc*ident.{0,5}vasculaire.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,5}isch?[\u00e9e]mique.{0,5}c[\u00e9e]r[\u00e9e]bral|acc*ident.{0,3}h[\u00e9e]morragique.{0,3}c[\u00e9e]r[\u00e9e]bral",
+        "regexp_v1": "[^a-z]AVC[^a-z]|acc*ident.{0,5}vasculaire.{0,5}c[ée]r[ée]bral|acc*ident.{0,5}isch?[ée]mique.{0,5}c[ée]r[ée]bral",
+        "regexp_v2": "(?<!APHP)(?<!UHCD)[^a-z]AVC[^a-z](?!UNITE)|acc*ident.{0,5}vasculaire.{0,5}c[ée]r[ée]bral|acc*ident.{0,5}isch?[ée]mique.{0,5}c[ée]r[ée]bral",
+        "regexp_v3": "(?<!APHP)(?<!UHCD)[^a-z]AVC[^a-z](?!UNITE)|acc*ident.{0,5}vasculaire.{0,5}c[ée]r[ée]bral|acc*ident.{0,5}isch?[ée]mique.{0,5}c[ée]r[ée]bral|acc*ident.{0,3}h[ée]morragique.{0,3}c[ée]r[ée]bral",
         "version": "v4"
     },
     {
         "icd10": "I60",
         "id_regexp": "id_regexp_hemormening",
-        "libelle": "h\u00e9morragie sous-arachno\u00efdienne",
+        "libelle": "hémorragie sous-arachnoïdienne",
         "list_cui": "C0038525",
-        "regexp": "h[\u00e9e]morr?agi.{0,5}m[\u00e9e]ning[\u00e9e]e|h[\u00e9e]morr?agi.{0,5}sous-?arachno[\u00efi]dienne",
+        "regexp": "h[ée]morr?agi.{0,5}m[ée]ning[ée]e|h[ée]morr?agi.{0,5}sous-?arachno[ïi]dienne",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -297,7 +297,7 @@
         "id_regexp": "id_regexp_bpco",
         "libelle": "BPCO, maladie pulmonaire, pneumopathie, HTAP",
         "list_cui": "C0024117,C0024115,C0032285,C0020542,C0004096,C0006266,C0264492,C0034067",
-        "regexp": "[^a-z]BPCO[^a-z]|[^a-z]HTAP[^a-z]|bronchopneumopathie|maladie.{0,5}pulmonaire|pneumopathie|a[sth][sth][sth]me|bronch?ospasme|a[sth][sth][sth]matique|insuf.{1,2}isance.{0,5}respiratoire.{0,5}chronique|emph.s[\u00e8e]me|emf.s[\u00e8e]me",
+        "regexp": "[^a-z]BPCO[^a-z]|[^a-z]HTAP[^a-z]|bronchopneumopathie|maladie.{0,5}pulmonaire|pneumopathie|a[sth][sth][sth]me|bronch?ospasme|a[sth][sth][sth]matique|insuf.{1,2}isance.{0,5}respiratoire.{0,5}chronique|emph.s[èe]me|emf.s[èe]me",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -313,7 +313,7 @@
     {
         "icd10": "J96",
         "id_regexp": "id_regexp_insrespchronique",
-        "libelle": "Insuffisance repiratoire chronique\u00a0",
+        "libelle": "Insuffisance repiratoire chronique",
         "list_cui": "C0264492",
         "regexp": "insuf.{1,2}isance.{0,5}respiratoire.{0,5}chronique",
         "regexp_exclude": "",
@@ -322,18 +322,18 @@
     {
         "icd10": "J41",
         "id_regexp": "id_regexp_emphyseme",
-        "libelle": "Emphys\u00e8me",
+        "libelle": "Emphysème",
         "list_cui": "C0034067",
-        "regexp": "emph.s[\u00e8e]me|emf.s[\u00e8e]me",
+        "regexp": "emph.s[èe]me|emf.s[èe]me",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "icd10": "J18-J17",
         "id_regexp": "id_regexp_malrenale",
-        "libelle": "Insuffisance r\u00e9nale chronique, maladie r\u00e9nale, n\u00e9phropathie,IRC,Insuffisance r\u00e9nale aigu\u00eb",
+        "libelle": "Insuffisance rénale chronique, maladie rénale, néphropathie,IRC,Insuffisance rénale aiguë",
         "list_cui": "C0035078,C0022661,C0022658,C0022660",
-        "regexp": "maladie.{0,5}r[e\u00e9]nale|n[e\u00e9]phropathie|Insuffisance.{0,5}r[e\u00e9]nale.{0,5}chronique|[^a-z]IRC[^a-z]|[^a-z]dialyse|h[\u00e9e]modialyse",
+        "regexp": "maladie.{0,5}r[eé]nale|n[eé]phropathie|Insuffisance.{0,5}r[eé]nale.{0,5}chronique|[^a-z]IRC[^a-z]|[^a-z]dialyse|h[ée]modialyse",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -369,7 +369,7 @@
         "id_regexp": "id_regexp_plaquenil",
         "libelle": "Hydroxychloroquine, Plaquenil",
         "list_cui": "",
-        "regexp": "hydroxychloroquine|plaqu[\u00e9e]nil",
+        "regexp": "hydroxychloroquine|plaqu[ée]nil",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -384,9 +384,9 @@
     {
         "icd10": "G35",
         "id_regexp": "id_regexp_sep",
-        "libelle": "Scl\u00e9rose en Plaques",
+        "libelle": "Sclérose en Plaques",
         "list_cui": "C0026769",
-        "regexp": "scl[\u00e9e]rose.{0,5}en.{0,5}plaque.?|[^a-z]SEP[^a-z]",
+        "regexp": "scl[ée]rose.{0,5}en.{0,5}plaque.?|[^a-z]SEP[^a-z]",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -395,7 +395,7 @@
         "libelle": "Cancer",
         "list_cui": "C0027651,C1882062,C0006826",
         "refresh": "false",
-        "regexp": "(?<!pre)(?<!pre )cancer[^a-z]|tumeur(?!.{0,7}b[e\u00e9\u00e8]nigne)|carcinome|m[e\u00e9]lanome|n[e\u00e9]oplasie|sarcome",
+        "regexp": "(?<!pre)(?<!pre )cancer[^a-z]|tumeur(?!.{0,7}b[eéè]nigne)|carcinome|m[eé]lanome|n[eé]oplasie|sarcome",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -405,8 +405,8 @@
         "index_extract": "",
         "libelle": "Ventilation, Intubation",
         "list_cui": "",
-        "regexp": "intub[e\u00e9]|intubation|extubation|[^a-z]ventil[\u00e9e]|mise?\\s*sous\\s*respirateur|\\bIOT\\b|\\bVM\\b|\\bVNI\\b",
-        "regexp_exclude": "d[\u00e9e]cision\\s*de\\s*non\\s*intubation|fonction\\s+ventilatoire\\s*pr\u00e9caire|ventilation\\s*manuelle|non-?intubation|VNI.{0,5}\\s*ne\\s*pas\\s*d[\u00e9e]]buter",
+        "regexp": "intub[eé]|intubation|extubation|[^a-z]ventil[ée]|mise?\\s*sous\\s*respirateur|\\bIOT\\b|\\bVM\\b|\\bVNI\\b",
+        "regexp_exclude": "d[ée]cision\\s*de\\s*non\\s*intubation|fonction\\s+ventilatoire\\s*précaire|ventilation\\s*manuelle|non-?intubation|VNI.{0,5}\\s*ne\\s*pas\\s*d[ée]]buter",
         "version": "v2"
     },
     {
@@ -430,61 +430,61 @@
     {
         "icd10": "C90-C97",
         "id_regexp": "id_regexp_leucemie",
-        "libelle": "Leuc\u00e9mie",
+        "libelle": "Leucémie",
         "list_cui": "C0686584,C0023418",
-        "regexp": "Leuc[\u00e9e]mie",
+        "regexp": "Leuc[ée]mie",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "icd10": "C80-C97",
         "id_regexp": "id_regexp_hemopathie",
-        "libelle": "H\u00e9mopathie",
+        "libelle": "Hémopathie",
         "list_cui": "C0686584,C0023418,C0024299",
-        "regexp": "leuc[\u00e9e]mie|lymphome|my[\u00e9e]lome",
+        "regexp": "leuc[ée]mie|lymphome|my[ée]lome",
         "regexp_exclude": "",
         "version": "v2"
     },
     {
         "icd10": "D87",
         "id_regexp": "id_regexp_defimmun",
-        "libelle": "D\u00e9ficit immunitaire",
+        "libelle": "Déficit immunitaire",
         "list_cui": "C0021051",
-        "regexp": "D[\u00e9e]ficit *immunitaire|Syndromes *d.immunod[e\u00e9]ficience|Hypogammaglobulin[\u00e9e]mie",
+        "regexp": "D[ée]ficit *immunitaire|Syndromes *d.immunod[eé]ficience|Hypogammaglobulin[ée]mie",
         "regexp_exclude": "Syndrome *d.immunodeficience *acquise",
         "version": "v2"
     },
     {
-        "comment": "Trop de faux positifs... developper une m\u00e9thode sp\u00e9cifique",
+        "comment": "Trop de faux positifs... developper une méthode spécifique",
         "deprecated": "true",
         "id_regexp": "id_regexp_vih",
-        "libelle": "VIH - SIDA - S\u00e9ropositif",
+        "libelle": "VIH - SIDA - Séropositif",
         "list_cui": "C0019693,C0001175",
-        "regexp": "[^A-Z]HIV+[^A-Z]|[^A-Z]VIH[^A-Z]|[^A-Z]SIDA[^A-Z]|S[\u00e9e]ropositi..",
+        "regexp": "[^A-Z]HIV+[^A-Z]|[^A-Z]VIH[^A-Z]|[^A-Z]SIDA[^A-Z]|S[ée]ropositi..",
         "regexp_exclude": "[^A-Z]VIH[^.]{0,20}n..?gative|[^A-Z]VIH[ :]*-[^0-9]",
         "version": "v1"
     },
     {
         "id_regexp": "id_regexp_hepb",
-        "libelle": "H\u00e9patite B, VHB",
+        "libelle": "Hépatite B, VHB",
         "list_cui": "C0019163",
-        "regexp": "(h[e\u00e9]patite *B|VHB) *(chronique|compliqu[e\u00e9]|suivi|contr[^\u00f4o]le|trait[e\u00e9])|cirrhose *VHB|pour (h[\u00e9e]patite B|VHB)|(dans *le *cadre.|suivi|trait[e\u00e9\u00e8]|en charge){0,20}(h[\u00e9e]patite b|VHB)",
+        "regexp": "(h[eé]patite *B|VHB) *(chronique|compliqu[eé]|suivi|contr[ôo]l[ée]|trait[eé])|cirrhose *VHB|pour (h[ée]patite B|VHB)|(dans *le *cadre.|suivi|trait[eéè]|en charge){0,20}(h[ée]patite b|VHB)",
         "regexp_exclude": "vaccination hepatite B|vaccin vhb|vhb-",
         "version": "v2"
     },
     {
         "id_regexp": "id_regexp_aomi",
-        "libelle": "AOMI, art\u00e9riopathie oblit\u00e9rante des membres inf\u00e9rieurs",
+        "libelle": "AOMI, artériopathie oblitérante des membres inférieurs",
         "list_cui": "C1306889",
-        "regexp": "[^a-z]AOMI[^a-z]|art[e\u00e9]riopathi..{0,5}oblit.r[ea]nte|art.rite.{0,5}des.{0,5}membres.{0,5}inf.rieurs",
+        "regexp": "[^a-z]AOMI[^a-z]|art[eé]riopathi..{0,5}oblit.r[ea]nte|art.rite.{0,5}des.{0,5}membres.{0,5}inf.rieurs",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "id_regexp": "id_regexp_sdra",
-        "libelle": "SDRA, d\u00e9tresse respiratoire",
+        "libelle": "SDRA, détresse respiratoire",
         "list_cui": "C0035222",
-        "regexp": "[^a-z]SDRA[^a-z]|d[\u00e9e]tresse.{0,5}respiratoire",
+        "regexp": "[^a-z]SDRA[^a-z]|d[ée]tresse.{0,5}respiratoire",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -500,7 +500,7 @@
         "comment": "on supprime, utiliser les mouvements des patients",
         "deprecated": "true",
         "id_regexp": "id_regexp_chir",
-        "libelle": "Chirurgie r\u00e9cente",
+        "libelle": "Chirurgie récente",
         "list_cui": "C0543467",
         "regexp": "chirurgie.{0,5}?r.cente|chirurgie",
         "regexp_exclude": "",
@@ -508,9 +508,9 @@
     },
     {
         "id_regexp": "id_regexp_grossesse",
-        "libelle": "Grossesse en cours, enceinte, semaines d'am\u00e9norrh\u00e9e, SA",
+        "libelle": "Grossesse en cours, enceinte, semaines d'aménorrhée, SA",
         "list_cui": "C0032961",
-        "regexp": "grossesse.{0,5}en.{0,5}cours|[enceinte.{0,5}|semaine *d.?am[\u00e9e]norr?h[\u00e9e]|gravid.?",
+        "regexp": "grossesse.{0,5}en.{0,5}cours|[enceinte.{0,5}|semaine *d.?am[ée]norr?h[ée]|gravid.?",
         "regexp_exclude": "femmes enceintes|femme non enceinte|femme *enceinte *: *[0-9]",
         "version": "v2"
     },
@@ -525,12 +525,12 @@
         "version": "v2"
     },
     {
-        "comment": "on supprime, trop de bruit, temporalit\u00e9 difficile ",
+        "comment": "on supprime, trop de bruit, temporalité difficile ",
         "deprecated": "true",
         "id_regexp": "id_regexp_voyage",
-        "libelle": "voyage *r\u00e9cent\u00a0",
+        "libelle": "voyage *récent",
         "list_cui": "C2919443,C3532581",
-        "regexp": "voyage|retour.d[eu]?|avion|[a\u00e0] *l.[\u00e9e]tranger",
+        "regexp": "voyage|retour.d[eu]?|avion|[aà] *l.[ée]tranger",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -538,7 +538,7 @@
         "id_regexp": "id_regexp_sla",
         "libelle": "SLA",
         "list_cui": "C0002736",
-        "regexp": "[^A-Z]SLA[^A-Z]|Scl[\u00e9e]rose *lat[\u00e9e]rale *amyotrophiq|maladie *de *charcot|un *charcot",
+        "regexp": "[^A-Z]SLA[^A-Z]|Scl[ée]rose *lat[ée]rale *amyotrophiq|maladie *de *charcot|un *charcot",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -558,7 +558,7 @@
         "libelle": "Poids",
         "list_cui": "",
         "refresh": "false",
-        "regexp": "(Poids|p[\u00e9e\u00e8]se)[^a-z0-9A-Z<>]*(de|est|est a|a)?[^a-z0-9A-Z<>,]*([0-9]+[.,]?[0-9]* *(kg|g)[0-9]*)",
+        "regexp": "(Poids|p[éeè]se)[^a-z0-9A-Z<>]*(de|est|est a|a)?[^a-z0-9A-Z<>,]*([0-9]+[.,]?[0-9]* *(kg|g)[0-9]*)",
         "regexp_exclude": "prise de poids",
         "version": "v2"
     },
@@ -567,7 +567,7 @@
         "index_extract": "",
         "libelle": "Greffe",
         "list_cui": "",
-        "regexp": "greff[\u00e9e]|transplantation|patient *transplant",
+        "regexp": "greff[ée]|transplantation|patient *transplant",
         "regexp_exclude": "en *attente *de *greffe|en *attente *de *transplantation|bilan[^a-z]*pre[^a-z]*greffe",
         "version": "v2"
     },
@@ -575,9 +575,9 @@
         "comment": "on supprime, inclu dans surinfection",
         "deprecated": "true",
         "id_regexp": "id_regexp_surinfbact",
-        "libelle": "Surinfection *bact\u00e9rienne",
+        "libelle": "Surinfection *bactérienne",
         "list_cui": "C1868758,C0004623,C0729518",
-        "regexp": "Surinfection *bact[\u00e9e]rienne",
+        "regexp": "Surinfection *bact[ée]rienne",
         "regexp_exclude": "",
         "version": "v2"
     },
@@ -599,21 +599,21 @@
     },
     {
         "id_regexp": "id_regexp_fumeur",
-        "libelle": "Fumeur, tabagisme, paquet-ann\u00e9e (PA)",
+        "libelle": "Fumeur, tabagisme, paquet-année (PA)",
         "list_cui": "C0453996",
         "refresh": "false",
-        "regexp": "fumeur|fumeuse|[^-]tabagi|[^a-z]tabac[^a-z]|paquet.{0,5}?ann[\u00e9e].?",
+        "regexp": "fumeur|fumeuse|[^-]tabagi|[^a-z]tabac[^a-z]|paquet.{0,5}?ann[ée].?",
         "regexp_exclude": "non\\s+fumeur|tabac\\s+non|tabagisme\\s+non|Tabac\\s*[=:]?\\s*0|tabagi(sm|qu)e\\s+sevr|(pas|ni|ou)\\s+de\\s+(consommation\\s+de\\s+)?taba|pas\\s+d\\'intoxication\\s+tabagi|0 tabac",
         "regexp_exclude_v1": "non fumeur|tabac non|tabagisme non|Tabac 0|Tabac *= *0|tabagisme sevr|0 tabac",
-        "regexp_v1": "fumeur|fumeuse|tabagism.?|[^a-z]tabac[^a-z]|paquet.{0,5}ann[\u00e9e].?",
+        "regexp_v1": "fumeur|fumeuse|tabagism.?|[^a-z]tabac[^a-z]|paquet.{0,5}ann[ée].?",
         "version": "v2"
     },
     {
         "id_regexp": "id_regexp_paquetannee",
         "index_extract": "1",
-        "libelle": "Paquet-ann\u00e9e (PA)",
+        "libelle": "Paquet-année (PA)",
         "list_cui": "",
-        "regexp": "(\\d{1,4})\\s*(paquet|cigarette|cig)s?\\s*(par|/|-)\\s*(an(n[\u00e9e]e)?)( *(pendant|jusqu.[\u00e0a]) *\\d+.{7})?",
+        "regexp": "(\\d{1,4})\\s*(paquet|cigarette|cig)s?\\s*(par|/|-)\\s*(an(n[ée]e)?)( *(pendant|jusqu.[àa]) *\\d+.{7})?",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -622,7 +622,7 @@
         "index_extract": "1",
         "libelle": "Paquet-jour)",
         "list_cui": "",
-        "regexp": "(\\d{1,4})\\s*(paquet|cigarette|cig)s?\\s*(par|/|-)\\s*(j|jour)( *(pendant|jusqu.[\u00e0a]) *\\d+.{7})?",
+        "regexp": "(\\d{1,4})\\s*(paquet|cigarette|cig)s?\\s*(par|/|-)\\s*(j|jour)( *(pendant|jusqu.[àa]) *\\d+.{7})?",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -641,7 +641,7 @@
         "id_regexp": "id_regexp_radiotherapie",
         "libelle": "radiotherapie",
         "list_cui": "",
-        "regexp": "radioth[e\u00e9\u00e8]rapie",
+        "regexp": "radioth[eéè]rapie",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -668,18 +668,18 @@
     {
         "date_modification": "29/04/2020",
         "id_regexp": "id_regexp_ischemiedigestive",
-        "libelle": "Isch\u00e9mie digestive",
+        "libelle": "Ischémie digestive",
         "list_cui": "",
-        "regexp": "isch[e\u00e9]mie *digestive|isch[e\u00e9]mie *intestinale?|isch[e\u00e9]mie *m[e\u00e9]sent[e\u00e9]rique",
+        "regexp": "isch[eé]mie *digestive|isch[eé]mie *intestinale?|isch[eé]mie *m[eé]sent[eé]rique",
         "regexp_exclude": "",
         "version": "v1"
     },
     {
         "date_modification": "29/04/2020",
         "id_regexp": "id_regexp_ischemierenale",
-        "libelle": "Isch\u00e9mie r\u00e9nale",
+        "libelle": "Ischémie rénale",
         "list_cui": "",
-        "regexp": "isch[e\u00e9]mie *r[e\u00e9]nale|isch[e\u00e9]mie *n[e\u00e9]phrique|rein *isch[e\u00e9]mique",
+        "regexp": "isch[eé]mie *r[eé]nale|isch[eé]mie *n[eé]phrique|rein *isch[eé]mique",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -688,7 +688,7 @@
         "id_regexp": "id_regexp_bariatrique",
         "libelle": "Chirurgie bariatrique",
         "list_cui": "",
-        "regexp": "chirurgie *(bariatrique|.{0,10}ob[e\u00e9]sit[e\u00e9])",
+        "regexp": "chirurgie *(bariatrique|.{0,10}ob[eé]sit[eé])",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -697,7 +697,7 @@
         "id_regexp": "id_regexp_sleeve",
         "libelle": "Sleeve",
         "list_cui": "",
-        "regexp": "[^a-z]sleeve[^a-z]|[^a-z]slive[^a-z]|gastroplastie *verticale *calibr[e\u00e9]e *avec *r[e\u00e9]section *gastrique",
+        "regexp": "[^a-z]sleeve[^a-z]|[^a-z]slive[^a-z]|gastroplastie *verticale *calibr[eé]e *avec *r[eé]section *gastrique",
         "regexp_exclude": "",
         "version": "v1"
     },
@@ -722,9 +722,9 @@
     {
         "date_modification": "29/04/2020",
         "id_regexp": "id_regexp_dermatolupique",
-        "libelle": "Raynaud, engelures, livedo, vascularite cutan\u00e9e",
+        "libelle": "Raynaud, engelures, livedo, vascularite cutanée",
         "list_cui": "",
-        "regexp": "[^a-z]de *Raynaud[^a-z]|engelures|[^a-z]livedo[^a-z]|vascularite *cutan[e\u00e9]e",
+        "regexp": "[^a-z]de *Raynaud[^a-z]|engelures|[^a-z]livedo[^a-z]|vascularite *cutan[eé]e",
         "regexp_exclude": "",
         "version": "v1"
     }
