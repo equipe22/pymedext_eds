@@ -61,7 +61,7 @@ class TextDataset(Dataset):
     
 
 #from pymedextcore.document import Document
-from .annotators import Endlines, SentenceTokenizer, SectionSplitter, rawtext_loader
+from .annotators import Endlines, SentenceTokenizer, SectionSplitter
 from .utils import timer, to_chunks
 #from pymedext_eds.med import MedicationAnnotator, MedicationNormalizer
 import pkg_resources
