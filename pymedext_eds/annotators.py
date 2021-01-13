@@ -18,13 +18,47 @@ from .verbs import verbs_list
 
 
 class Pipeline:
-    def __init__(self, pipeline):
+
+    def __init__(self, 
+                 pipeline,
+                 mode = 'safe'):
+        """
+        pipeline = List of Annotators
+        mode = ['safe', 'overwrite', 'update']
+            safe (default): raises an error if an annotation key already exists;
+            overwrite: overwrite annotations if the same key exists;
+            TODO: update: only execute the annotators if the key does not exist
+        """
         self.pipeline = pipeline
+        self.mode = mode
 
     def annotate(self, docs):
+        """
+        docs = List of Documents
+        """
+        
+        if self.mode == 'safe':
+            self._check_annotation_keys(docs)
+            
         for doc in docs:
+            
+            if self.mode == 'overwrite':
+                keys = [x.key_output for x in self.pipeline]
+                doc.annotations = [x for x in doc.annotations if x.type not in keys]
+            
             doc.annotate(self.pipeline)
+            
         return [doc.to_dict() for doc in docs]
+    
+    def _check_annotation_keys(self, docs):
+        
+        keys = [x.key_output for x in self.pipeline]
+        
+        for key_out in keys:
+            for doc in docs: 
+                if len(doc.get_annotations(key_out)) > 0:
+                    raise Exception(f"'{key_out}' exists in annotations keys. Please, make sure that the pipeline has not been already executed on these documents or change the Pipeline mode to 'overwrite'.")
+                break
 
     def process(self, payload):
         docs = [Document.from_dict(doc) for doc in payload ]
