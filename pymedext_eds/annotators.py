@@ -721,3 +721,49 @@ class SectionSplitter(Annotator):
                 ))
 
         return res
+
+
+class RuSHSentenceTokenizer(Annotator):
+    """
+    Rule based sentence tokenizer based on PyRuSH (https://github.com/jianlins/PyRuSH)
+    The rules can be modified 
+    """
+    
+    def __init__(self, key_input, key_output, ID, rules = "configs/rush_rules.tsv", remove_new_lines = True):
+
+        super().__init__(key_input, key_output, ID) 
+        self.rush = RuSH("configs/rush_rules.tsv")
+        self.rm = remove_new_lines
+        
+
+    def annotate_function(self, _input):
+        inps= self.get_all_key_input(_input)
+        
+        res = []
+
+        for inp in inps:
+
+            if inp.attributes is None:
+                attributes = None
+            else:
+                attributes = inp.attributes.copy()
+                
+            sentences=self.rush.segToSentenceSpans(inp.value)
+
+            for sent in sentences:
+                if sent in ['.','', ' ', ';']:
+                    continue
+                    
+                value = inp.value[sent.begin:sent.end]
+                if self.rm: 
+                    value = re.sub('\n', ' ', value)
+
+                res.append(Annotation(
+                    type = self.key_output,
+                    value = value,
+                    span = (sent.begin,sent.end),
+                    source = self.ID,
+                    source_ID = inp.ID,
+                    attributes = attributes
+                ))
+        return res
