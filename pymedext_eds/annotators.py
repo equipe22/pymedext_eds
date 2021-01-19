@@ -12,6 +12,12 @@ try:
 except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
 
+try:
+    from PyRuSH import RuSH
+except:
+    print('To use RuSHSentenceTokenizer, install PyRuSH using "pip install PyRuSH"')
+
+
 
 from .constants import SECTION_DICT
 from .verbs import verbs_list
@@ -732,7 +738,7 @@ class RuSHSentenceTokenizer(Annotator):
     def __init__(self, key_input, key_output, ID, rules = "configs/rush_rules.tsv", remove_new_lines = True):
 
         super().__init__(key_input, key_output, ID) 
-        self.rush = RuSH("configs/rush_rules.tsv")
+        self.rush = RuSH(rules)
         self.rm = remove_new_lines
         
 
