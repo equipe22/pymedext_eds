@@ -119,6 +119,7 @@ except:
         'T067', # Phenomenon or Process, ex.: Disasters; Motor Traffic Accidents; Depolymerization
         # 'T072', # Physical Object, ex.: Printed Media; Meteors; Physical object
         'T039', # Physiologic Function, ex.: Biorhythms; Hearing; Vasodilation
+    }
 
 from .constants import SECTION_DICT
 from .verbs import verbs_list
