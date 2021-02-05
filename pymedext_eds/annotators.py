@@ -590,6 +590,9 @@ class RegexMatcher(Annotator):
                 snippet_span = (max(start - snippet_size, 0), min(end + snippet_size, raw.span[1]))
                 snippet_value = raw.value[snippet_span[0]:snippet_span[1]]
 
+                if syntagme.attributes is None:
+                    syntagme.attributes = dict()
+
                 res.append(Annotation(
                     type=self.key_output,
                     value=m.group(i),
