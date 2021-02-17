@@ -12,6 +12,9 @@ try:
     from quickumls.constants import ACCEPTED_SEMTYPES
 except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
+    ACCEPTED_SEMTYPES = []
+    
+    
 
     # HORRIBLE fix to libconv issue
     ACCEPTED_SEMTYPES = {
@@ -304,9 +307,11 @@ class SentenceTokenizer(Annotator):
                 attributes = None
             else:
                 attributes = inp.attributes.copy()
-
+            
+            # TODO: change this.
             for sent in re.split(r'([\r\n;\?!.])', inp.value):
-                if sent in ['.', '', ' ', ';']:
+                
+                if sent in ['.', '', ' ', ';', '']:
                     continue
 
                 start = inp.value.find(sent) + offset
@@ -744,9 +749,12 @@ class QuickUMLSAnnotator(Annotator):
                  threshold=0.9,
                  similarity_name="jaccard",  # Choose between "dice", "jaccard", "cosine", or "overlap".
                  window=5,
-                 accepted_semtypes=ACCEPTED_SEMTYPES):
+                 accepted_semtypes=None):
 
         super().__init__(key_input, key_output, ID)
+        
+        if accepted_semtypes is None:
+            accepted_semtypes = ACCEPTED_SEMTYPES
 
         self.matcher = QuickUMLS(quickumls_fp=quickumls_fp,
                                  overlapping_criteria=overlapping_criteria,
