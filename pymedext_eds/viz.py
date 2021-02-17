@@ -14,7 +14,7 @@ import re
 #                 res.append(anno)
 #         return res
 
-def convert_to_displacy(document, entity_type, attributes, label_key = 'label'):
+def convert_to_displacy(document, entity_type, attributes=None, label_key = 'label'):
     ents= []
     annots = document.get_annotations(entity_type)
     #annots = [x for x in document if x['type'] in entity_type and x['source_ID'] == source_id]
@@ -22,7 +22,8 @@ def convert_to_displacy(document, entity_type, attributes, label_key = 'label'):
         annots = document.get_annotations(entity_type)
         ents= []
         for annot in annots:
-            if label_key in annot.attributes.keys():
+            
+            if (annot.attributes is not None) and (label_key in annot.attributes.keys()):
                 label = annot.attributes[label_key]
             else:
                 label = entity_type.upper()
@@ -42,25 +43,36 @@ def convert_to_displacy(document, entity_type, attributes, label_key = 'label'):
 
 
 def display_annotations(document,  entities = ["ENT/DRUG", "ENT/DOSE"], attributes = None,
+                        text_source = 'raw_text',
                         palette = [ '#ffb3ba','#ffdfba','#ffffba','#baffc9','#bae1ff'],
                        label_key = 'label', jupyter = True):
 
-    to_disp = []
     tmp = { "ents": []}
 
     for entity in entities:
         conv_ents = convert_to_displacy(document, entity, attributes = attributes, label_key = label_key)
         tmp['ents'] += conv_ents
 
-    tmp['text'] = document.annotations[1].value
+    if text_source == 'raw_text':
+        tmp['text'] = document.annotations[0].value
+    else: 
+        segments = [x.to_dict() for x in document.get_annotations(_type=text_source)]
+        tmp['text'] = ''
+        for segment in segments: 
+            offset = len(tmp['text'])
+            offset_diff = segment['span'][0] - offset
+            if offset_diff > 0 : 
+                tmp['text'] += ' ' * (offset_diff-1) + '\n'
+            tmp['text'] += segment['value']
+            
     tmp['uuid'] = 0
-
-    tmp['text'] = re.sub('\. ', '\n ', tmp['text'])
+    
+    tmp['ents'] = sorted(tmp['ents'], key = lambda i: i['start'])
 
     options = {"colors" : {}}
     i = 0
     for entity in entities:
-        options['colors'][entity.upper()] = palette[i]
+        options['colors'][entity.upper()] = palette[i % len(palette)]
         i += 1
 
     return displacy.render(tmp, manual=True, style = 'ent', options = options , jupyter=jupyter, minify=True)

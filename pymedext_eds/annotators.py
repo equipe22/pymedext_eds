@@ -11,7 +11,7 @@ try:
     from quickumls.constants import ACCEPTED_SEMTYPES
 except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
-
+    
     # HORRIBLE fix to libconv issue
     ACCEPTED_SEMTYPES = {
         # 'T020', # Acquired Abnormality, ex.: Hemorrhoids; Hernia, Femoral; Cauliflower ear
@@ -121,6 +121,12 @@ except:
         'T039', # Physiologic Function, ex.: Biorhythms; Hearing; Vasodilation
     }
 
+try:
+    from PyRuSH import RuSH
+except:
+    print('To use RuSHSentenceTokenizer, install PyRuSH using "pip install PyRuSH"')
+
+
 from .constants import SECTION_DICT
 from .verbs import verbs_list
 
@@ -132,13 +138,48 @@ class Annotation(Annot):
 
 
 class Pipeline:
-    def __init__(self, pipeline):
+
+    def __init__(self,
+                 pipeline,
+                 mode='safe'):
+        """
+        pipeline = List of Annotators
+        mode = ['safe', 'overwrite', 'update']
+            safe (default): raises an error if an annotation key already exists;
+            overwrite: overwrite annotations if the same key exists;
+            TODO: update: only execute the annotators if the key does not exist
+        """
         self.pipeline = pipeline
+        self.mode = mode
 
     def annotate(self, docs):
+        """
+        docs = List of Documents
+        """
+
+        if self.mode == 'safe':
+            self._check_annotation_keys(docs)
+
         for doc in docs:
+
+            if self.mode == 'overwrite':
+                keys = [x.key_output for x in self.pipeline]
+                doc.annotations = [x for x in doc.annotations if x.type not in keys]
+
             doc.annotate(self.pipeline)
+
         return [doc.to_dict() for doc in docs]
+
+    def _check_annotation_keys(self, docs):
+
+        keys = [x.key_output for x in self.pipeline]
+
+        for key_out in keys:
+            for doc in docs:
+                if len(doc.get_annotations(key_out)) > 0:
+                    raise Exception(
+                        f"'{key_out}' exists in annotations keys. Please, make sure that the pipeline has not been already executed on these documents or change the Pipeline mode to 'overwrite'.")
+                break
 
     def process(self, payload):
         docs = [Document.from_dict(doc) for doc in payload]
@@ -180,7 +221,7 @@ class Endlines(Annotator):
     @staticmethod
     def gerer_saut_ligne(txt):
         txt = re.sub(r"M\.", "M ", txt)
-        txt = re.sub(r'Mme\.', "Mme ", txt)
+        txt = re.sub(r"Mme\.", "Mme ", txt)
         txt = re.sub(r"Mlle\.", "Mlle ", txt)
         txt = re.sub(r"Mr\.", "Mr ", txt)
         txt = re.sub(r"Pr\.", "Pr ", txt)
@@ -263,9 +304,11 @@ class SentenceTokenizer(Annotator):
                 attributes = None
             else:
                 attributes = inp.attributes.copy()
-
+            
+            # TODO: change this.
             for sent in re.split(r'([\r\n;\?!.])', inp.value):
-                if sent in ['.', '', ' ', ';']:
+                
+                if sent in ['.', '', ' ', ';', '']:
                     continue
 
                 start = inp.value.find(sent) + offset
@@ -466,7 +509,8 @@ class SyntagmeTokenizer(Annotator):
         for sent in inp:
 
             syntagmes = self.tokenize_syntagmes(sent.value)
-
+            if sent.attributes is None:
+                sent.attributes = {}
             for syntagme in syntagmes:
                 start = sent.span[0] + sent.value.find(syntagme)
                 end = start + len(syntagme) - 1
@@ -601,15 +645,12 @@ class Negation(Annotator):
 
 
 class RegexMatcher(Annotator):
+    
+    def __init__(self, key_input, key_output, ID, regexp_file="list_regexp.json"):
 
-    def __init__(self, key_input, key_output, ID, regexp="list_regexp.json"):
-
-        if isinstance(regexp, str):
-            with open(regexp, 'r') as f:
-                self.list_regexp = json.load(f)
-        else:
-            self.list_regexp = regexp
-
+        with open(regexp_file, 'r') as f:
+            self.list_regexp = json.load(f)
+            
         super().__init__(key_input, key_output, ID)
 
     def annotate_function(self, _input):
@@ -665,6 +706,9 @@ class RegexMatcher(Annotator):
                 snippet_span = (max(start - snippet_size, 0), min(end + snippet_size, raw.span[1]))
                 snippet_value = raw.value[snippet_span[0]:snippet_span[1]]
 
+                if syntagme.attributes is None:
+                    syntagme.attributes = dict()
+
                 res.append(Annotation(
                     type=self.key_output,
                     value=m.group(i),
@@ -699,9 +743,12 @@ class QuickUMLSAnnotator(Annotator):
                  threshold=0.9,
                  similarity_name="jaccard",  # Choose between "dice", "jaccard", "cosine", or "overlap".
                  window=5,
-                 accepted_semtypes=ACCEPTED_SEMTYPES):
+                 accepted_semtypes=None):
 
         super().__init__(key_input, key_output, ID)
+        
+        if accepted_semtypes is None:
+            accepted_semtypes = ACCEPTED_SEMTYPES
 
         self.matcher = QuickUMLS(quickumls_fp=quickumls_fp,
                                  overlapping_criteria=overlapping_criteria,
@@ -775,8 +822,8 @@ class SectionSplitter(Annotator):
         # set any traitement section occuring before histoire or evolution to traitement entree
         index_before_treat = match.loc[lambda x: x.match_type.isin(self.head_before_treat)].index.tolist()
         index_before_treat = min(index_before_treat, default=0)
-        match.loc[lambda x: (x.match_type == "traitement") & (
-                x.index < index_before_treat), "match_type"] = "traitement_entree"
+        match.loc[lambda x: (x.match_type == "traitement") \
+                  & (x.index < index_before_treat), "match_type"] = "traitement_entree"
 
         if inp.attributes is None:
             attributes = {}
@@ -796,4 +843,49 @@ class SectionSplitter(Annotator):
                 attributes=att
             ))
 
+        return res
+
+
+class RuSHSentenceTokenizer(Annotator):
+    """
+    Rule based sentence tokenizer based on PyRuSH (https://github.com/jianlins/PyRuSH)
+    The rules can be modified 
+    """
+
+    def __init__(self, key_input, key_output, ID, rules="configs/rush_rules.tsv", remove_new_lines=True):
+
+        super().__init__(key_input, key_output, ID)
+        self.rush = RuSH(rules)
+        self.rm = remove_new_lines
+
+    def annotate_function(self, _input):
+        inps = self.get_all_key_input(_input)
+
+        res = []
+
+        for inp in inps:
+
+            if inp.attributes is None:
+                attributes = None
+            else:
+                attributes = inp.attributes.copy()
+
+            sentences = self.rush.segToSentenceSpans(inp.value)
+
+            for sent in sentences:
+                if sent in ['.', '', ' ', ';']:
+                    continue
+
+                value = inp.value[sent.begin:sent.end]
+                if self.rm:
+                    value = re.sub('\n', ' ', value)
+
+                res.append(Annotation(
+                    type=self.key_output,
+                    value=value,
+                    span=(sent.begin, sent.end),
+                    source=self.ID,
+                    source_ID=inp.ID,
+                    attributes=attributes
+                ))
         return res
