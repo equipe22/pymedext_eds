@@ -1,3 +1,6 @@
+Ceci est un *fork* du repo de l'équipe 22. Pour une présentation succinte, voir la [fiche du wiki d'équipe](https://gitlab.eds.aphp.fr/equipedatascience/equipedatascience-notes/-/wikis/PyMedExt/).
+
+
 # Pymedext annotators for the EDS pipeline
 
 ## Installation

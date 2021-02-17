@@ -3,3 +3,8 @@ __pycache__
 data/quickumls_files/*
 .DS_Store
 data/apmed*
+
+.idea
+patterns.json
+@
+*.egg-info
