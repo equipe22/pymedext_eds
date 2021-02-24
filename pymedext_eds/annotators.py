@@ -23,7 +23,7 @@ except:
         # 'T190', # Anatomical Abnormality, ex.: Bronchial Fistula; Foot Deformities; Hyperostosis of skull
         # 'T017', # Anatomical Structure, ex.: Cadaver; Pharyngostome; Anatomic structures
         # 'T008', # Animal, ex.: Animals; Animals, Laboratory; Carnivore
-        'T195', # Antibiotic, ex.: Antibiotics; bactericide; Thienamycins
+        'T195',  # Antibiotic, ex.: Antibiotics; bactericide; Thienamycins
         # 'T194', # Archaeon, ex.: Thermoproteales; Haloferax volcanii; Methanospirillum
         # 'T007', # Bacterium, ex.: Acetobacter; Bacillus cereus; Cytophaga
         # 'T053', # Behavior, ex.: Homing Behavior; Sexuality; Habitat Selection
@@ -32,10 +32,10 @@ except:
         # 'T091', # Biomedical Occupation or Discipline, ex.: Adolescent Medicine; Cellular Neurobiology; Dentistry
         # 'T122', # Biomedical or Dental Material, ex.: Acrylic Resins; Bone Cements; Dentifrices
         # 'T012', # Bird, ex.: Serinus; Ducks; Quail
-        'T029', # Body Location or Region, ex.: Forehead; Sublingual Region; Base of skull structure
-        'T023', # Body Part, Organ, or Organ Component, ex.: Aorta; Brain Stem; Structure of neck of femur
+        'T029',  # Body Location or Region, ex.: Forehead; Sublingual Region; Base of skull structure
+        'T023',  # Body Part, Organ, or Organ Component, ex.: Aorta; Brain Stem; Structure of neck of femur
         # 'T030', # Body Space or Junction, ex.: Knee joint; Greater sac of peritoneum; Synapses
-        'T031', # Body Substance, ex.: Amniotic Fluid; saliva; Smegma
+        'T031',  # Body Substance, ex.: Amniotic Fluid; saliva; Smegma
         # 'T022', # Body System, ex.: Endocrine system; Renin-angiotensin system; Reticuloendothelial System
         # 'T088', # Carbohydrate Sequence, ex.: Carbohydrate Sequence; Abnormal carbohydrate sequence
         # 'T025', # Cell, ex.: B-Lymphocytes; Dendritic Cells; Fibroblasts
@@ -46,14 +46,14 @@ except:
         # 'T120', # Chemical Viewed Functionally, ex.: Aerosol Propellants; Detergents; Stabilizing Agents
         # 'T104', # Chemical Viewed Structurally, ex.: Ammonium Compounds; Cations; Sulfur Compounds
         # 'T185', # Classification, ex.: Anatomy (MeSH Category); Tumor Stage Classification; axis i
-        'T201', # Clinical Attribute, ex.: Bone Density; heart rate; Range of Motion, Articular
-        'T200', # Clinical Drug, ex.: Ranitidine 300 MG Oral Tablet [Zantac]; Aspirin 300 MG Delayed Release Oral
+        'T201',  # Clinical Attribute, ex.: Bone Density; heart rate; Range of Motion, Articular
+        'T200',  # Clinical Drug, ex.: Ranitidine 300 MG Oral Tablet [Zantac]; Aspirin 300 MG Delayed Release Oral
         # 'T077', # Conceptual Entity, ex.: Geographic Factors; Fractals; Secularism
         # 'T019', # Congenital Abnormality, ex.: Albinism; Cleft palate with cleft lip; Polydactyly of toes
         # 'T056', # Daily or Recreational Activity, ex.: Badminton; Dancing; Swimming
-        'T060', # Diagnostic Procedure, ex.: Biopsy; Heart Auscultation; Magnetic Resonance Imaging
-        'T047', # Disease or Syndrome, ex.: Diabetes Mellitus; Drug Allergy; Malabsorption Syndrome
-        'T203', # Drug Delivery Device, ex.: Nordette 21 Day Pack; {7 (Terazosin 1 MG Oral Tablet) / 7 (Terazosin 2 MG
+        'T060',  # Diagnostic Procedure, ex.: Biopsy; Heart Auscultation; Magnetic Resonance Imaging
+        'T047',  # Disease or Syndrome, ex.: Diabetes Mellitus; Drug Allergy; Malabsorption Syndrome
+        'T203',  # Drug Delivery Device, ex.: Nordette 21 Day Pack; {7 (Terazosin 1 MG Oral Tablet) / 7 (Terazosin 2 MG
         # 'T065', # Educational Activity, ex.: Academic Training; Family Planning Training; Preceptorship
         # 'T196', # Element, Ion, or Isotope, ex.: Carbon; Chromium Isotopes; Radioisotopes
         # 'T018', # Embryonic Structure, ex.: Blastoderm; Fetus; Neural Crest
@@ -64,7 +64,7 @@ except:
         # 'T051', # Event, ex.: Anniversaries; Exposure to Mumps virus (event); Device Unattended
         # 'T050', # Experimental Model of Disease, ex.: Alloxan Diabetes; Liver Cirrhosis, Experimental; Transient Gene Knock-Out
         # 'T099', # Family Group, ex.: Daughter; Is an only child; Unmarried Fathers
-        'T033', # Finding, ex.: Birth History; Downward displacement of diaphragm; Decreased glucose level
+        'T033',  # Finding, ex.: Birth History; Downward displacement of diaphragm; Decreased glucose level
         # 'T013', # Fish, ex.: Bass; Salmonidae; Whitefish
         # 'T168', # Food, ex.: Beverages; Egg Yolk (Dietary); Ice Cream
         # 'T021', # Fully Formed Anatomical Structure, ex.: Entire body as a whole; Female human body; Set of parts of human body
@@ -77,32 +77,33 @@ except:
         # 'T096', # Group, ex.: Focus Groups; jury; teams
         # 'T102', # Group Attribute, ex.: Family Size; Group Structure; Life Expectancy
         # 'T131', # Hazardous or Poisonous Substance, ex.: Carcinogens; Fumigant; Mutagens
-        'T058', # Health Care Activity, ex.: ambulatory care services; Clinic Activities; Preventive Health Services
+        'T058',  # Health Care Activity, ex.: ambulatory care services; Clinic Activities; Preventive Health Services
         # 'T093', # Health Care Related Organization, ex.: Centers for Disease Control and Prevention (U.S.); Halfway Houses;
         # 'T125', # Hormone, ex.: Enteric Hormones; thymic humoral factor; Prohormone
         # 'T016', # Human, ex.: Homo sapiens; jean piaget; Member of public
         # 'T068', # Human-caused Phenomenon or Process, ex.: Baby Boom; Cultural Evolution; Mass Media
         # 'T078', # Idea or Concept, ex.: Capitalism; Civil Rights; Ethics
         # 'T129', # Immunologic Factor, ex.: Antigens; Immunologic Factors; Blood group antigen P
-        'T130', # Indicator, Reagent, or Diagnostic Aid, ex.: Fluorescent Dyes; Indicators and Reagents; India ink stain
+        'T130',
+        # Indicator, Reagent, or Diagnostic Aid, ex.: Fluorescent Dyes; Indicators and Reagents; India ink stain
         # 'T055', # Individual Behavior, ex.: Assertiveness; Grooming; Risk-Taking
-        'T037', # Injury or Poisoning, ex.: Accidental Falls; Carbon Monoxide Poisoning; Snake Bites
+        'T037',  # Injury or Poisoning, ex.: Accidental Falls; Carbon Monoxide Poisoning; Snake Bites
         # 'T197', # Inorganic Chemical, ex.: Carbonic Acid; aluminum nitride; ferric citrate
-        'T170', # Intellectual Product, ex.: Decision Support Techniques; Information Systems; Literature
-        'T034', # Laboratory or Test Result, ex.: Blood Flow Velocity; Serum Calcium Level; Spinal Fluid Pressure
-        'T059', # Laboratory Procedure, ex.: Blood Protein Electrophoresis; Crystallography; Radioimmunoassay
+        'T170',  # Intellectual Product, ex.: Decision Support Techniques; Information Systems; Literature
+        'T034',  # Laboratory or Test Result, ex.: Blood Flow Velocity; Serum Calcium Level; Spinal Fluid Pressure
+        'T059',  # Laboratory Procedure, ex.: Blood Protein Electrophoresis; Crystallography; Radioimmunoassay
         # 'T171', # Language, ex.: Armenian language; braille; Bilingualism
         # 'T066', # Machine Activity, ex.: Computer Simulation; Equipment Failure; Natural Language Processing
         # 'T015', # Mammal, ex.: Ursidae Family; Hamsters; Macaca
         # 'T073', # Manufactured Object, ex.: car seat; Cooking and Eating Utensils; Goggles
-        'T074', # Medical Device, ex.: Bone Screws; Headgear, Orthodontic; Compression Stockings
-        'T048', # Mental or Behavioral Dysfunction, ex.: Agoraphobia; Cyclothymic Disorder; Frigidity
-        'T041', # Mental Process, ex.: Anger; Auditory Fatigue; Avoidance Learning
+        'T074',  # Medical Device, ex.: Bone Screws; Headgear, Orthodontic; Compression Stockings
+        'T048',  # Mental or Behavioral Dysfunction, ex.: Agoraphobia; Cyclothymic Disorder; Frigidity
+        'T041',  # Mental Process, ex.: Anger; Auditory Fatigue; Avoidance Learning
         # 'T063', # Molecular Biology Research Technique, ex.: Northern Blotting; Genetic Engineering; In Situ Hybridization
         # 'T044', # Molecular Function, ex.: Binding, Competitive; Electron Transport; Glycolysis
         # 'T085', # Molecular Sequence, ex.: Genetic Code; Homologous Sequences; Molecular Sequence
         # 'T070', # Natural Phenomenon or Process, ex.: Air Movements; Corrosion; Lightning (phenomenon)
-        'T191', # Neoplastic Process, ex.: Abdominal Neoplasms; Bowen's Disease; Polyp in nasopharynx
+        'T191',  # Neoplastic Process, ex.: Abdominal Neoplasms; Bowen's Disease; Polyp in nasopharynx
         # 'T114', # Nucleic Acid, Nucleoside, or Nucleotide, ex.: Cytosine Nucleotides; Guanine; Oligonucleotides
         # 'T086', # Nucleotide Sequence, ex.: Base Sequence; Direct Repeat; RNA Sequence
         # 'T090', # Occupation or Discipline, ex.: Aviation; Craniology; Ecology
@@ -111,15 +112,16 @@ except:
         # 'T109', # Organic Chemical, ex.: Benzene Derivatives
         # 'T001', # Organism, ex.: Organism; Infectious agent; Heterotroph
         # 'T032', # Organism Attribute, ex.: Age; Birth Weight; Eye Color
-        'T040', # Organism Function, ex.: Breeding; Hibernation; Motor Skills
+        'T040',  # Organism Function, ex.: Breeding; Hibernation; Motor Skills
         # 'T092', # Organization, ex.: Labor Unions; United Nations; Boarding school
-        'T046', # Pathologic Function, ex.: Inflammation; Shock; Thrombosis
+        'T046',  # Pathologic Function, ex.: Inflammation; Shock; Thrombosis
         # 'T101', # Patient or Disabled Group, ex.: Amputees; Institutionalized Child; Mentally Ill Persons
-        'T121', # Pharmacologic Substance, ex.: Antiemetics; Cardiovascular Agents; Alka-Seltzer
-        'T067', # Phenomenon or Process, ex.: Disasters; Motor Traffic Accidents; Depolymerization
+        'T121',  # Pharmacologic Substance, ex.: Antiemetics; Cardiovascular Agents; Alka-Seltzer
+        'T067',  # Phenomenon or Process, ex.: Disasters; Motor Traffic Accidents; Depolymerization
         # 'T072', # Physical Object, ex.: Printed Media; Meteors; Physical object
-        'T039', # Physiologic Function, ex.: Biorhythms; Hearing; Vasodilation
+        'T039',  # Physiologic Function, ex.: Biorhythms; Hearing; Vasodilation
     }
+
 
 try:
     from PyRuSH import RuSH
@@ -509,8 +511,10 @@ class SyntagmeTokenizer(Annotator):
         for sent in inp:
 
             syntagmes = self.tokenize_syntagmes(sent.value)
+            
             if sent.attributes is None:
                 sent.attributes = {}
+            
             for syntagme in syntagmes:
                 start = sent.span[0] + sent.value.find(syntagme)
                 end = start + len(syntagme) - 1
@@ -645,11 +649,14 @@ class Negation(Annotator):
 
 
 class RegexMatcher(Annotator):
-    
-    def __init__(self, key_input, key_output, ID, regexp_file="list_regexp.json"):
 
-        with open(regexp_file, 'r') as f:
-            self.list_regexp = json.load(f)
+    def __init__(self, key_input, key_output, ID, regexp="list_regexp.json"):
+
+        if isinstance(regexp, str):
+            with open(regexp, 'r') as f:
+                self.list_regexp = json.load(f) else:
+        else:
+            self.list_regexp = regexp
             
         super().__init__(key_input, key_output, ID)
 
@@ -822,6 +829,7 @@ class SectionSplitter(Annotator):
         # set any traitement section occuring before histoire or evolution to traitement entree
         index_before_treat = match.loc[lambda x: x.match_type.isin(self.head_before_treat)].index.tolist()
         index_before_treat = min(index_before_treat, default=0)
+        
         match.loc[lambda x: (x.match_type == "traitement") \
                   & (x.index < index_before_treat), "match_type"] = "traitement_entree"
 
@@ -849,7 +857,7 @@ class SectionSplitter(Annotator):
 class RuSHSentenceTokenizer(Annotator):
     """
     Rule based sentence tokenizer based on PyRuSH (https://github.com/jianlins/PyRuSH)
-    The rules can be modified 
+    The rules can be modified
     """
 
     def __init__(self, key_input, key_output, ID, rules="configs/rush_rules.tsv", remove_new_lines=True):
