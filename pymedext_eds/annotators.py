@@ -654,7 +654,7 @@ class RegexMatcher(Annotator):
 
         if isinstance(regexp, str):
             with open(regexp, 'r') as f:
-                self.list_regexp = json.load(f) else:
+                self.list_regexp = json.load(f)
         else:
             self.list_regexp = regexp
             
