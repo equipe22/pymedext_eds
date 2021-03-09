@@ -74,13 +74,13 @@ class Pipeline:
         self.sentenceSplitter = SentenceTokenizer(["section"], "sentence", ID="sentences")
 
         self.models_param = [{
-                                 'tagger_path': 'data/models/apmed4/entities/final-model.pt',
+                                 'tagger_path': 'data/models/apmed5/entities/final-model.pt',
                                  'tag_name': 'entity_pred'},
                              {
-                                 'tagger_path': 'data/models/apmed4/events/final-model.pt',
+                                 'tagger_path': 'data/models/apmed5/events/final-model.pt',
                                  'tag_name': 'event_pred'},
                              {
-                                 'tagger_path': "data/models/apmed4/drugblob/final-model.pt",
+                                 'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
                                  'tag_name': 'drugblob_pred'}]
 
         self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
