@@ -140,19 +140,40 @@ def split_and_write_corpus(corpus, outdir, n_annotator, n_common_files):
         write_to_brat(subdir, common_doc)
 
 
-def write_brat_conf(entities, outdir):
+
+def write_brat_conf(outdir = None, entities = [], relations = {}, norm = {}):
+    """
+    Generate and write configs for BRAT annotations tools
+    #entities
+    list: ["ENT/SIGNS", "ENT/DIAG_NAME"]
+    #relations
+    Located	Arg1:Person,	Arg2:Building|City|Country
+    #norm
+    dict of dic: "UMLS_ALL":{"DB":"umls0/umls_bglinsty", "<URL>":"http://en.wikipedia.org", "<URLBASE>":"http://en.wikipedia.org/?curid=%s"}
+    """
     #norm conf
-    tool_conf = """[normalization]\nUMLS_FR     DB:data/UMLS_FR, <URL>:https://uts.nlm.nih.gov"""
-    
-    with open(join(outdir, "tools.conf"), 'w') as h:
-        h.write(tool_conf)
+    if norm:
+        tool_conf = "\n".join([t + "\t" + ", ".join([k + ":" + v for k,v in norm[t].items()] )for t in norm.keys()])
+        if outdir:
+            with open(join(outdir, "tools.conf"), 'w') as h:
+                h.write(tool_conf)
+                
+        else:
+            print(tool_conf)
         
     #ann conf
     ent, rel, ev, attr = '\n'.join(entities), "", "", ""
-    annotation_conf = """[entities]\n{}\n[relations]\n{}\n[events]\n{}\n[attributes]""".format(ent, rel, ev, attr)
+    rel = ""
+    for k, v in relations.items():
+        rel += "{}\tArg1:{},\tArg2:{}\n".format(k, "|".join(v['Arg1']), "|".join(v['Arg2']))
     
-    with open(join(outdir, "annotation.conf"), 'w') as h:
-        h.write(annotation_conf)
+    annotation_conf = """[entities]\n{}\n[relations]\n{}\n[events]\n{}\n[attributes]""".format(ent, rel, ev, attr)
+    if outdir:
+        with open(join(outdir, "annotation.conf"), 'w') as h:
+            h.write(annotation_conf)
+    else:
+        print(annotation_conf)
+        
         
     #visual conf
     labels = "\n".join([ t+ "|"+ t+ "|" + "".join([u[0] for u in t.split('_')])  for t in entities])
@@ -160,9 +181,12 @@ def write_brat_conf(entities, outdir):
     drawing = "[drawing]\n{}".format('\n'.join(["{}\tbgColor:{}".format(et, col) for et, col in zip(entities, colors)]))
     visual_conf = "[labels]\n{}\n\n{}".format(labels, drawing)
     
-    
-    with open(join(outdir, "visual.conf"), 'w') as h:
-        h.write(visual_conf)
+    if outdir:
+        with open(join(outdir, "visual.conf"), 'w') as h:
+            h.write(visual_conf)
+            
+    else:
+        print(visual_conf)
         
     #keybord shortcut
     shortcut = []
@@ -176,5 +200,8 @@ def write_brat_conf(entities, outdir):
             
     shortcut_conf = "\n".join([short+"\t"+t  for t, short in zip(entities, shortcut) if t!=""])
 
-    with open(join(outdir, "kb_shortcuts.conf"), 'w') as h:
-        h.write(shortcut_conf)
+    if outdir:
+        with open(join(outdir, "kb_shortcuts.conf"), 'w') as h:
+            h.write(shortcut_conf)
+    else:
+        print(shortcut_conf)
