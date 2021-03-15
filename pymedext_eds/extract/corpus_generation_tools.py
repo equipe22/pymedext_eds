@@ -58,7 +58,7 @@ def get_brat_ann(doc, pheno_ent_type, threshold=0, verbose = 0):
 
         #norm form
         norm_type = "umls_" + ent_type.lower()
-        norm_forms = doc.get_annotations(norm_type, source_id = ent.ID)
+        norm_forms = [anno for anno in doc.annotations if (anno.type == norm_type) & (anno.source_ID==ent.ID) ]
         
         if norm_forms:
             norm_form = norm_forms[0]
@@ -153,7 +153,7 @@ def write_brat_conf(outdir = None, entities = [], relations = {}, norm = {}):
     """
     #norm conf
     if norm:
-        tool_conf = "\n".join([t + "\t" + ", ".join([k + ":" + v for k,v in norm[t].items()] )for t in norm.keys()])
+        tool_conf = "[normalization]\n" + "\n".join([t + "\t" + ", ".join([k + ":" + v for k,v in norm[t].items()] )for t in norm.keys()])
         if outdir:
             with open(join(outdir, "tools.conf"), 'w') as h:
                 h.write(tool_conf)
