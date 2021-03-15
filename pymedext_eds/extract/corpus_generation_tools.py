@@ -8,6 +8,7 @@ import random
 import re
 import tqdm
 import json
+from ..utils import rawtext_loader
 
 def createifnotexists(path):
     if not os.path.exists(path):
@@ -19,8 +20,9 @@ def getfn(path):
 def get_pymedext_path(text_path):
     return join(os.path.dirname(text_path) , "pymedext", getfn(text_path)+".json")
 
-def get_ent(ann, ent_types):
-    return [t for t in ann if t['type'] in ent_types]
+def get_ent(doc, ent_types):
+    return [ann for ann_type in ent_types for ann in doc.get_annotations(ann_type)]
+
     
 
 def get_multiline_format(start, end, mention):
@@ -34,59 +36,74 @@ def get_multiline_format(start, end, mention):
     return "{}\t{}".format(span, mention)
     
 
-def get_brat_ann(ann, text, pheno_ent_type, threshold=0):
-    pheno_ent = get_ent(ann, pheno_ent_type)
+def get_brat_ann(doc, pheno_ent_type, threshold=0, verbose = 0):
+    pheno_ent = get_ent(doc, pheno_ent_type)
+    text = doc.raw_text()
     brat = []
     for i, ent in enumerate(pheno_ent):
-        start = ent["span"][0]
-        end = ent["span"][1]
+        start = ent.span[0]
+        end = ent.span[1]
         mention = text[start:end]
+        ent_type = ent.type.split('/')[1]
+        if (re.sub('\s','', mention) != re.sub('\s', '', ent.value) ):
+            if verbose > 0:
+                print(mention, "!!!!", ent.value)
+            continue
 
-        if ent["attributes"]["score"] < threshold:
+        if ent.attributes["score"] < threshold:
             continue
             
-        ner_line = "T{}\t{} {}".format(i, ent["type"].split('/')[1], get_multiline_format(start, end, mention))
+        #brat line
+        ner_line = "T{}\t{} {}".format(i, ent_type, get_multiline_format(start, end, mention))
 
-        if (ent["attributes"]["normalized_mention"]!="") & ("CUI" in ent["attributes"]["normalized_mention"]):
-            normalized_mention = ent["attributes"]["normalized_mention"] if "CUI" in ent["attributes"]["normalized_mention"] else ent["attributes"]["normalized_mention"]['0']
-            norm_line = "N{}\tReference T{} UMLS_FR:{}\t{}".format(i, i, normalized_mention["CUI"], normalized_mention["STR"])
+        #norm form
+        norm_type = "umls_" + ent_type.lower()
+        norm_forms = doc.get_annotations(norm_type, source_id = ent.ID)
+        
+        if norm_forms:
+            norm_form = norm_forms[0]
+            normalized_mention = norm_form.attributes['label']
+            cui = norm_form.attributes['cui']
+            norm_score =  norm_form.attributes['score']
 
-            if normalized_mention["prob"] < threshold:
+            norm_line = "N{}\tReference T{} UMLS_FR:{}\t{}".format(i, i, cui, normalized_mention)
+            if norm_score < threshold:
                 continue
-                
+
             brat.append(norm_line)
             
         brat.append(ner_line)
 
-    return "\n".join(brat)
+    return "\n".join(brat), text
 
-def get_new_corpus(text_paths, pheno_ent_type, size = 100,  threshold = 0.6, text_min_size = 50, seed=1000000):
+
+
+def get_new_corpus(text_path, pipeline, pheno_ent_type, size = None,  threshold = 0,  min_n_tokens = 0, seed=1000000, verbose = 0):
+    """Generate a pre-annotated corpus for entity and normalizaton from directory of text file, using a pymedext pipeline, and filtering by entity types"""
+    file_list = glob.glob(text_path + '/*.txt')
     random.seed(seed)
-    texts_sample = random.choices(text_paths, k=size)
-    corpus = []
-    for text_path, pymedext_path in tqdm.tqdm(texts_sample):
-        with open(text_path, 'r') as h:
-            text = h.read().strip()
-
-        if len(text.split(' ')) < text_min_size:
-            continue
-        try:
-            with open(pymedext_path, "r") as h:
-                doc = json.load(h)
-        except:
-            print(pymedext_path, "not found")
-            doc = {'annotations':[]}
-            continue
-
-        ann = doc["annotations"]
-
-        brat = get_brat_ann(ann, text, pheno_ent_type, threshold=threshold)
+    if size is None:
+        size = len(file_list)
+    file_list = random.choices(file_list, k=size)
+    
+    docs = [rawtext_loader(x) for x in file_list]
+    
+    for doc in docs:
+        doc.annotate(pipeline)
         
-        corpus.append((getfn(text_path), text, brat))
+    corpus = []
+    for doc in docs:
+        brat_ann, text = get_brat_ann(doc= doc, pheno_ent_type = ["ENT/SIGNS", "ENT/DIAG_NAME"], threshold=threshold, verbose = verbose)
+        if len(text.split(' ')) < min_n_tokens:
+            continue
+            
+        corpus.append((doc.source_ID, text, brat_ann))
         
     return corpus
 
 def write_to_brat(output_dir, corpus):
+    createifnotexists(output_dir)
+
     for doc_id, text, ann in corpus:
         text_path = join(output_dir, doc_id +".txt")
         ann_path = join(output_dir, doc_id +".ann")

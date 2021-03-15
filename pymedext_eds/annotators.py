@@ -36,6 +36,31 @@ class Pipeline:
         res = self.process(payload)
 
         return {'result':res}
+    
+    
+class CleanText(Annotator):
+
+    def annotate_function(self, _input):
+        inp= self.get_first_key_input(_input)[0]
+        txt = self.preprocess(inp.value)
+
+
+        return([Annotation(
+            type = self.key_output,
+            value = txt,
+            span = (0, len(txt)),
+            source = self.ID,
+            source_ID = inp.ID
+        )])
+
+    @staticmethod
+    def preprocess(txt):
+        #todo: implement clean text without span modification (unlike endlines)
+
+        return txt
+
+
+
 
 class Endlines(Annotator):
 

@@ -126,6 +126,7 @@ class NERAnnotator(Annotator):
                             'attributes': {'score':label.score},
                             'source_ID': source.ID}
                           )
+                
         return res
    
     @staticmethod
@@ -179,7 +180,8 @@ class NERAnnotator(Annotator):
             if len(sent) == 0:
                 continue
             
-            sent_att = [x.attributes.copy() for x in sentences if x.ID == sent[0]['source_ID']][0]
+            sent_att = [x.attributes.copy() if x.attributes else None for x in sentences if x.ID == sent[0]['source_ID']][0]
+            sent_att = sent_att if sent_att else {}
             
             #pheno post processing
             for ent in sent:
@@ -196,8 +198,9 @@ class NERAnnotator(Annotator):
                             value = ent['value'],
                             span = ent['span'],
                             source = self.ID,
+                            isEntity = True,
                             source_ID = ent['source_ID'],
-                            attributes = {**sent_att, **ent['attributes']}
+                            attributes = {**sent_att, **ent['attributes']} 
                         ))
 
             # if only 1 entity in sent => append Annotation
@@ -208,6 +211,7 @@ class NERAnnotator(Annotator):
                         type = sent[0]['type'],
                         value = sent[0]['value'],
                         span = sent[0]['span'],
+                        isEntity = True,
                         source = self.ID,
                         source_ID = sent[0]['source_ID'],
                         attributes = {**sent_att, **sent[0]['attributes']}
@@ -250,6 +254,7 @@ class NERAnnotator(Annotator):
                                     type = ent['type'],
                                     value = ent['value'],
                                     span = ent['span'],
+                                    isEntity = True,
                                     source = self.ID,
                                     source_ID = ent['source_ID'],
                                     attributes = {**sent_att, **ent['attributes']}
@@ -288,6 +293,7 @@ class NERAnnotator(Annotator):
                                     type = drug['type'],
                                     value = drug['value'],
                                     span = drug['span'],
+                                    isEntity = True,
                                     source = self.ID,
                                     source_ID = drug['source_ID'],
                                     attributes = drug['attributes']
@@ -310,6 +316,8 @@ class NERAnnotator(Annotator):
                                     type = ent['type'],
                                     value = ent['value'],
                                     span = ent['span'],
+                                    isEntity = True,
+
                                     source = self.ID,
                                     source_ID = ent['source_ID'],
                                     attributes = {**sent_att, **ent['attributes']}

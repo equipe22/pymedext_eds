@@ -148,8 +148,8 @@ def brat_to_relations(group, entity_gold, entity_pred, relation_gold, relation_p
     entity_bag_pred = [conll_2_brat(group, col) for col in entity_pred]
 
     #relations
-    drugblob_pred = conll_2_brat(group, relation_gold)
-    drugblob_tag = conll_2_brat(group, relation_pred)
+    drugblob_pred = conll_2_brat(group, relation_pred)
+    drugblob_tag = conll_2_brat(group, relation_gold)
 
     #generate dataframe of candidate entities pairs,
     #from true entities and predicted entities
