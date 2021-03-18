@@ -111,12 +111,15 @@ class MedicationAnnotator(Annotator):
     def __init__(self, key_input, key_output, ID,
                  models_param,
                  mini_batch_size=128,
+                 max_sentence_length=1024,
                  device="cpu"):
 
         super().__init__(key_input, key_output, ID)
 
         self.mini_batch_size = mini_batch_size
         flair.device = torch.device(device)
+        
+        self.max_sentence_length = max_sentence_length
 
         self.model_zoo = []
         self.tagged_name = []
@@ -142,7 +145,20 @@ class MedicationAnnotator(Annotator):
     def infer_flair(self, sentences):
         flair_sentences = []
         for s in sentences:
-            flair_sentences.append(Sentence(s.value, start_position=s.span[0]))
+            # "Bug" in the tokenisation : if the sentence is too long (> 512 tokens)
+            # we get a runtime error.
+            if len(s.value) <= self.max_sentence_length:
+                flair_sentences.append(Sentence(s.value, start_position=s.span[0]))
+            else:
+                flair_sentences.append(Sentence(s.value[:self.max_sentence_length], start_position=s.span[0]))
+                # TODO : add sentences by splittin along spaces ?
+                # for i in range(len(s.value) // self.max_sentence_length):
+                #     flair_sentences.append(
+                #         Sentence(
+                #             s.value[i * self.max_sentence_length:(i + 1) * self.max_sentence_length], 
+                #             start_position=s.span[0] + i * self.max_sentence_length
+                #         )
+                #     )
 
         flair_sentences = self._filter_empty_sentences(flair_sentences)
 
