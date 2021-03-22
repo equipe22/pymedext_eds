@@ -4,8 +4,40 @@ import time
 
 from git import Repo, InvalidGitRepositoryError
 from logzero import logger
-from pymedextcore.document import Document
 
+from typing import Optional, Union, Any
+from pymedextcore.document import Document
+from pymedextcore.annotators import Annotator
+from pyspark.sql import types, functions as F, DataFrame, Column
+
+SCHEMA = types.ArrayType(types.StructType([
+    types.StructField("lexical_variant", types.StringType(), False),
+    types.StructField("start", types.IntegerType(), False),
+    types.StructField("end", types.IntegerType(), False),
+    types.StructField("offset", types.StringType(), False),
+    types.StructField("snippet", types.StringType(), False),
+    types.StructField("term_modifiers", types.StringType(), False),
+]))
+
+def pymedext2omop(record):
+    attr = record['attributes']
+
+    lexical_variant = record['value']
+    start, end = record['span']
+    offset = f"{start},{end}"
+    if 'snippet' in attr:
+        snippet = attr['snippet']
+    else:
+        snippet = None
+
+    modifiers = [
+        f'{k}={v}'
+        for k, v in attr.items()
+        if k in {'hypothesis', 'context', 'negation', 'id_regex'}
+    ]
+    term_modifiers = ','.join(modifiers)
+
+    return lexical_variant, start, end, offset, snippet, term_modifiers
 
 def timer(func):
     """Print the runtime of the decorated function"""
