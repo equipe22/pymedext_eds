@@ -5,7 +5,7 @@ sentencepiece==0.1.91
 unidecode
 numpy
 nltk
-torch
+torch==1.7.0
 flair
 sklearn
 rdflib>=4.2.2
@@ -14,8 +14,9 @@ flask
 blist
 uvicorn
 quickumls
-ray
+ray==1.1.0
 pydantic==1.6
 logzero
 gitpython
 PyRuSH
+typing_extensions
