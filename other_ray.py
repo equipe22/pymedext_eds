@@ -30,97 +30,6 @@ from pymedext_eds.db import get_engine, get_from_omop_note, get_note_ids, conver
 from pymedext_eds.utils import timer, to_chunks
 from pymedextcore.document import Document
 
-from pymedext_eds.annotators import Endlines, SentenceTokenizer, SectionSplitter
-from pymedext_eds.med import MedicationAnnotator, MedicationNormalizer
-import pkg_resources
-from glob import glob
-
-
-class Pipeline:
-    """
-    Pipeline designed to work with Ray 1.2.0
-    """
-    
-    def __init__(self, device=None, mini_batch_size=128):
-
-        if device is None:
-            if ray.get_gpu_ids():
-                device = f'cuda'
-            else:
-                device = 'cpu'
-
-        self.endlines = Endlines(["raw_text"], "clean_text", ID="endlines")
-        self.sections = SectionSplitter(['clean_text'], "section", ID='sections')
-        self.sentenceSplitter = SentenceTokenizer(["section"], "sentence", ID="sentences")
-
-        self.models_param = [
-            {
-                'tagger_path': 'data/models/apmed5/entities/final-model.pt',
-                'tag_name': 'entity_pred'
-            },
-            {
-                'tagger_path': 'data/models/apmed5/events/final-model.pt',
-                'tag_name': 'event_pred'
-            },
-            {
-                'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
-                'tag_name': 'drugblob_pred'
-            },
-        ]
-
-        self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
-
-        data_path = pkg_resources.resource_filename('pymedext_eds', 'data/romedi')
-        romedi_path = glob(data_path + '/*.p')[0]
-
-        self.norm = MedicationNormalizer(['ENT/DRUG', 'ENT/CLASS'], 'normalized_mention', ID='norm',
-                                         romedi_path=romedi_path)
-
-        self.pipeline = [self.endlines, self.sections, self.sentenceSplitter, self.med, self.norm]
-
-    def process(self, payload):
-        """
-        Does the heavy lifting.
-        
-        TODO: pool sentences together to optimize batch size.
-        """
-        
-        docs = {doc['ID']: Document.from_dict(doc) for doc in payload}
-        
-        for doc in docs.values():
-            doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
-        
-        sentences = []
-        for doc in docs.values():
-            for annotation in doc.get_annotations('sentence'):
-                annotation.attributes['doc_id'] = doc.ID
-                sentences.append(annotation)
-                
-        logger.info(f"Processing {len(docs)} documents, {len(sentences)} sentences")
-            
-        placeholder_doc = Document('')
-        placeholder_doc.annotations = sentences
-        
-        placeholder_doc.annotate([self.med, self.norm])
-        
-        for annotation in placeholder_doc.annotations:
-            if annotation.type != 'sentence':
-                doc = docs[annotation.attributes['doc_id']]
-                del annotation.attributes['doc_id']
-                doc.annotations.append(annotation)
-        
-        return [doc.to_dict() for doc in docs.values()]
-
-    async def __call__(self, request):
-        """
-        Adaptation to Ray 1.2, with async starlette request mechanism.
-        """
-
-        payload = await request.json()
-        res = self.process(payload)
-
-        return {'result': res}
-
 
 @ray.remote
 def put_request(docs, host = '127.0.0.1', port = '8000', endpoint = 'annotator'):
@@ -245,10 +154,10 @@ if __name__ == '__main__':
     
     logger = _get_logger()
 
-    num_replicas = 1
+    num_replicas = 4
     num_gpus = .5
-    limit = 10
-    chunk_size = 5
+    limit = 100
+    chunk_size = 5 * num_replicas
     replica_chunk_size= chunk_size // num_replicas
     note_file = '/export/home/bdura/pymedext/pymedext_eds/data/note.csv'
     note_nlp_file = '/export/home/bdura/pymedext/pymedext_eds/data/note_nlp.csv'
