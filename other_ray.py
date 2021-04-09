@@ -41,7 +41,7 @@ class Pipeline:
     Pipeline designed to work with Ray 1.2.0
     """
     
-    def __init__(self, device=None):
+    def __init__(self, device=None, mini_batch_size=128):
 
         if device is None:
             if ray.get_gpu_ids():
@@ -87,14 +87,16 @@ class Pipeline:
         
         docs = {doc['ID']: Document.from_dict(doc) for doc in payload}
         
-        print(docs)
-        
         for doc in docs.values():
             doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
         
         sentences = []
         for doc in docs.values():
-            sentences.extend(doc.get_annotations('sentence'))
+            for annotation in doc.get_annotations('sentence'):
+                annotation.attributes['doc_id'] = doc.ID
+                sentences.append(annotation)
+                
+        logger.info(f"Processing {len(docs)} documents, {len(sentences)} sentences")
             
         placeholder_doc = Document('')
         placeholder_doc.annotations = sentences
@@ -103,13 +105,15 @@ class Pipeline:
         
         for annotation in placeholder_doc.annotations:
             if annotation.type != 'sentence':
-                docs[annotation.source_ID].append(annotation)
+                doc = docs[annotation.attributes['doc_id']]
+                del annotation.attributes['doc_id']
+                doc.annotations.append(annotation)
         
-        return [doc.to_dict() for doc in docs]
+        return [doc.to_dict() for doc in docs.values()]
 
     async def __call__(self, request):
         """
-        Adaptation to the new Ray, with async starlette request mechanism.
+        Adaptation to Ray 1.2, with async starlette request mechanism.
         """
 
         payload = await request.json()
@@ -242,9 +246,9 @@ if __name__ == '__main__':
     logger = _get_logger()
 
     num_replicas = 1
-    num_gpus = 1
-    limit = 200
-    chunk_size = 20
+    num_gpus = .5
+    limit = 10
+    chunk_size = 5
     replica_chunk_size= chunk_size // num_replicas
     note_file = '/export/home/bdura/pymedext/pymedext_eds/data/note.csv'
     note_nlp_file = '/export/home/bdura/pymedext/pymedext_eds/data/note_nlp.csv'
@@ -259,9 +263,10 @@ if __name__ == '__main__':
     client.create_backend('annotator', 
                          Pipeline, 
                          'cpu',
+                          32,
     #                     postprocess_params,
                          config=config,
-#                          ray_actor_options=actor_options
+                         ray_actor_options=actor_options
                          )
     client.create_endpoint("annotator", backend="annotator", route="/annotator", methods = ['POST'])
 
