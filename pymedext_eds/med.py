@@ -127,6 +127,7 @@ class MedicationAnnotator(Annotator):
             tagger = SequenceTagger.load(param["tagger_path"]).to(flair.device)
             tagger.tag_type = param["tag_name"]
             self.tagged_name.append(param["tag_name"])
+            
             # for elmo
             if hasattr(tagger.embeddings.embeddings[0], "ee"):
                 tagger.embeddings.embeddings[0].ee.cuda_device = flair.device.index
@@ -137,6 +138,10 @@ class MedicationAnnotator(Annotator):
                 if hasattr(e, "field"):
                     field = getattr(e, "field")
                     add_tags.append(field)
+                    
+                # And manually set the batch size
+                if hasattr(e, "batch_size"):
+                    e.batch_size = 512
 
             self.model_zoo.append(
                 (param["tag_name"], tagger, add_tags)
