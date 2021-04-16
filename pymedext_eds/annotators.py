@@ -85,7 +85,7 @@ class Endlines(Annotator):
         txt = self.gerer_saut_ligne(txt)
         txt = self.gerer_parenthese(txt)
 
-        txt = re.sub(r"CONCLUSIONS?([A-Za-z])",r"CONCLUSION \1", txt,re.IGNORECASE)
+        txt = re.sub(r"CONCLUSIONS?([A-Za-z])",r"CONCLUSION \1", txt,flags=re.IGNORECASE)
 
         phrases = re.split(r'([\r\n;\?!.])', txt)
 
@@ -113,8 +113,8 @@ class Endlines(Annotator):
         txt=re.sub(r"Dr\.","Dr ",txt)
         txt=re.sub(r"([A-Z])\.([A-Z])",r"\1 \2",txt)
         txt=re.sub(r"([0-9])\.([0-9])",r"\1,\2",txt)
-        txt=re.sub(r"(:\s*[a-z]+)\s*\n",r"\1.\n", txt, re.IGNORECASE)
-        txt=re.sub(r"\+\n",r"+.\n", txt, re.IGNORECASE)
+        txt=re.sub(r"(:\s*[a-z]+)\s*\n",r"\1.\n", txt, flags=re.IGNORECASE)
+        txt=re.sub(r"\+\n",r"+.\n", txt, flags=re.IGNORECASE)
 
         # on nettoie les espaces multiples
         txt = re.sub(r"([A-Za-z0-9,:])\s+([a-z0-9])",r"\1 \2",txt)  #modification nico 12 04 2014, sensible à la casse !!
