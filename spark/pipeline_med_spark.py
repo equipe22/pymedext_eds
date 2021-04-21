@@ -43,7 +43,7 @@ if __name__ == "__main__":
     sc = SparkContext.getOrCreate()
 
     # Read input tables
-    df_note = sql("select note_id, note_text from edsomop_qua.orbis_note").dropna(subset="note_text").limit(100)
+    df_note = sql("select note_id, note_text from edsomop_qua.orbis_note").dropna(subset="note_text").limit(1000)
     # df = pd.DataFrame({'note_text': ['1000 mg de doliprane matin et soir tant que la fièvre ne baisse pas.', '200g d ibuprophene tous les 3 jours']})
     # df_note = spark.createDataFrame(df)
     
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     endlines = Endlines(["raw_text"], "clean_text", ID="endlines")
     sections = SectionSplitter(['clean_text'], "section", ID= 'sections')
     sentenceSplitter = SentenceTokenizer(["section"],"sentence", ID="sentences")
-    med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=models_param,  device='cpu')
-    norm = MedicationNormalizer(['ENT/DRUG','ENT/CLASS'], 'normalized_mention', ID='norm',romedi_path= romedi_path)
+    med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=models_param, device='cpu')
+    norm = MedicationNormalizer(['ENT/DRUG','ENT/CLASS'], 'normalized_mention', ID='norm', romedi_path= romedi_path)
 
     pipeline = [endlines, sections, sentenceSplitter, med, norm]
     
@@ -80,4 +80,5 @@ if __name__ == "__main__":
     df_med = df_note.withColumn('annotations', medicaments(df_note.note_text))
     df_med = df_med.withColumn("extract", F.explode(df_med.annotations))
     df_med = df_med.select("note_id", "note_text", "extract.*")
-    df_med.write.parquet("./results_100_test.parquet")
+    df_med.write.parquet("./results_1000_test_gpu.parquet")
+    print(df_med.count())
