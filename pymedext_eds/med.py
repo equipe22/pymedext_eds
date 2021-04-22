@@ -60,12 +60,15 @@ from glob import glob
 
 
 class Pipeline:
-    def __init__(self,
-                 device=None):
+    """
+    Pipeline designed to work with Ray 1.2.0
+    """
+    
+    def __init__(self, device=None, mini_batch_size=128):
 
         if device is None:
             if ray.get_gpu_ids():
-                device = f'cuda:0'
+                device = f'cuda'
             else:
                 device = 'cpu'
 
@@ -73,15 +76,20 @@ class Pipeline:
         self.sections = SectionSplitter(['clean_text'], "section", ID='sections')
         self.sentenceSplitter = SentenceTokenizer(["section"], "sentence", ID="sentences")
 
-        self.models_param = [{
-                                 'tagger_path': 'data/models/apmed5/entities/final-model.pt',
-                                 'tag_name': 'entity_pred'},
-                             {
-                                 'tagger_path': 'data/models/apmed5/events/final-model.pt',
-                                 'tag_name': 'event_pred'},
-                             {
-                                 'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
-                                 'tag_name': 'drugblob_pred'}]
+        self.models_param = [
+            {
+                'tagger_path': 'data/models/apmed5/entities/final-model.pt',
+                'tag_name': 'entity_pred'
+            },
+            {
+                'tagger_path': 'data/models/apmed5/events/final-model.pt',
+                'tag_name': 'event_pred'
+            },
+            {
+                'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
+                'tag_name': 'drugblob_pred'
+            },
+        ]
 
         self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
 
@@ -94,14 +102,44 @@ class Pipeline:
         self.pipeline = [self.endlines, self.sections, self.sentenceSplitter, self.med, self.norm]
 
     def process(self, payload):
-        docs = [Document.from_dict(doc) for doc in payload]
-        for doc in docs:
-            doc.annotate(self.pipeline)
-        return [doc.to_dict() for doc in docs]
+        """
+        Does the heavy lifting.
+        
+        TODO: pool sentences together to optimize batch size.
+        """
+        
+        docs = {doc['ID']: Document.from_dict(doc) for doc in payload}
+        
+        for doc in docs.values():
+            doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
+        
+        sentences = []
+        for doc in docs.values():
+            for annotation in doc.get_annotations('sentence'):
+                annotation.attributes['doc_id'] = doc.ID
+                sentences.append(annotation)
+                
+        logger.info(f"Processing {len(docs)} documents, {len(sentences)} sentences")
+            
+        placeholder_doc = Document('')
+        placeholder_doc.annotations = sentences
+        
+        placeholder_doc.annotate([self.med, self.norm])
+        
+        for annotation in placeholder_doc.annotations:
+            if annotation.type != 'sentence':
+                doc = docs[annotation.attributes['doc_id']]
+                del annotation.attributes['doc_id']
+                doc.annotations.append(annotation)
+        
+        return [doc.to_dict() for doc in docs.values()]
 
-    def __call__(self, flask_request):
+    async def __call__(self, request):
+        """
+        Adaptation to Ray 1.2, with async starlette request mechanism.
+        """
 
-        payload = flask_request.json
+        payload = await request.json()
         res = self.process(payload)
 
         return {'result': res}
@@ -127,6 +165,7 @@ class MedicationAnnotator(Annotator):
             tagger = SequenceTagger.load(param["tagger_path"]).to(flair.device)
             tagger.tag_type = param["tag_name"]
             self.tagged_name.append(param["tag_name"])
+            
             # for elmo
             if hasattr(tagger.embeddings.embeddings[0], "ee"):
                 tagger.embeddings.embeddings[0].ee.cuda_device = flair.device.index
@@ -137,6 +176,10 @@ class MedicationAnnotator(Annotator):
                 if hasattr(e, "field"):
                     field = getattr(e, "field")
                     add_tags.append(field)
+                    
+                # And manually set the batch size
+                if hasattr(e, "batch_size"):
+                    e.batch_size = 512
 
             self.model_zoo.append(
                 (param["tag_name"], tagger, add_tags)

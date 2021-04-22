@@ -1,6 +1,6 @@
 ENV_PATH="/export/home/acalliger/pymedext-eds/env/pipeline_medicaments.tar.gz"
 DATA_PATH="/export/home/acalliger/pymedext-eds/data/data.tar.gz"
-CODE_PATH="/export/home/acalliger/pymedext-eds/dist/pymedext_eds-0.1.dev0-py3.6.egg"
+CODE_PATH="/export/home/acalliger/pymedext-eds/dist/pymedext_eds-0.1.dev0-py3.7.egg"
 
 
 $SPARK_HOME/bin/spark-submit \

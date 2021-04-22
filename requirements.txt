@@ -14,7 +14,7 @@ flask
 blist
 uvicorn
 quickumls
-ray==1.1.0
+ray==1.2
 pydantic==1.6
 logzero
 gitpython
