@@ -49,19 +49,30 @@ def main_process(
 if __name__ == '__main__':
     logger = _get_logger()
 
-    parser = argparse.ArgumentParser(description='Detection medicaments')
-    parser.add_argument('--input-table', '-i', default="coronaomop_unstable.note", help='La table de notes')
-    parser.add_argument('--output-table', '-o', default="coronaomop_unstable.note_nlp_medoc", help='La table de sortie')
-    parser.add_argument('--write-mode', '-m', default="full", help='append ou full - pour completer ou ecraser la table de sortie')
-    parser.add_argument('--limit', '-l', default=10, help='limit dataframe note')
-    parser.add_argument('--process', '-p', default="cuda", help='cpu or cuda')
-    parser.add_argument('--num-replica', '-r', default=2, help='nb of ray replica')
-    parser.add_argument('--num-gpus', '-g', default=1, help='nb of gpus')
-    parser.add_argument('--doc-batch-size', '-d', default=10, help='batch size document')
-    parser.add_argument('--sentence_batch_size', '-s', default=128, help='batch size sentence')
+    if len(sys.argv) > 1:
+        conf_path = Path(sys.argv[1])
+    else:
+        print('ERROR: configuration file path is not defined !')
+        sys.exit(1)
+
+    # Load conf file
+    config_object = ConfigParser(interpolation=ExtendedInterpolation())
+    config_object.read(conf_path)
+    input_schema = config_object["INPUT"]["schema"]
+    input_table = config_object["INPUT"]["table"]
+    limit = int(config_object["INPUT"]["limit"])
     
-    args = parser.parse_args()
+    output_schema = config_object["OUTPUT"]["schema"]
+    output_table = config_object["OUTPUT"]["table"]
+    write_mode = config_object["OUTPUT"]["write_mode"]
     
+    process = config_object["PROCESS"]["process"]
+    
+    num_replica = int(config_object["RAY_PARAMETERS"]["num_replica"])
+    num_gpus = int(config_object["RAY_PARAMETERS"]["num_gpus"])
+    doc_batch_size = int(config_object["RAY_PARAMETERS"]["doc_batch_size"])
+    sentence_batch_size = int(config_object["RAY_PARAMETERS"]["sentence_batch_size"])
+
     #### Read data 
     spark = SparkSession.builder \
             .appName("extract") \
@@ -75,34 +86,34 @@ if __name__ == '__main__':
     
     if args.write_mode == "full":
         df_note = (
-            sql(f"select person_id, note_datetime, note_id, note_text from {args.input_table}")
+            sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
             .dropna(subset="note_text")
             .filter(F.col('note_class_source_value').isin(list_cr))
-            .limit(int(args.limit))
+            .limit(limit)
             .toPandas()
         )
     elif args.write_mode == "append":
-        df_old_note = sql(f"select * from {args.output_table}")
-        df_note = sql(f"select person_id, note_datetime, note_id, note_text from {args.input_note}")
+        df_old_note = sql(f"select * from {output_schema}.{output_table}")
+        df_note = sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
         df_note = (
             df_note
             .dropna(subset="note_text")
             .filter(F.col('note_class_source_value').isin(list_cr))
             .join(df_old_note, on="note_id", how="left_anti")
-            .limit(int(args.limit))
+            .limit(limit)
             .toPandas()
         )
     
     run_pipeline(
-        num_replicas=int(args.num_replica), 
-        num_gpus=int(args.num_gpus), 
-        doc_batch_size=int(args.doc_batch_size), 
+        num_replicas=num_replicas, 
+        num_gpus=num_gpus, 
+        doc_batch_size=doc_batch_size, 
         batch_wait_timeout=.5, 
-        sentence_batch_size=int(args.sentence_batch_size),
+        sentence_batch_size=sentence_batch_size,
     )
     
     ### launch client
-    result = main_process(df_note, limit=args.limit)
+    result = main_process(df_note, limit=limit)
     
     ### write in database
     note_schema = (
@@ -131,7 +142,9 @@ if __name__ == '__main__':
     df_note_spark_to_add = spark.createDataFrame(result,schema=note_schema)
     
     if args.write_mode == "full":
-         df_note_spark_to_add.write.mode('overwrite').saveAsTable(args.output_table)
+        sql(f"USE {output_schema}")
+        df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif args.write_mode == "append":
+        sql(f"USE {output_schema}")
         df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
-        df_note_nlp_all.write.mode('overwrite').saveAsTable(args.output_table)
+        df_note_nlp_all.write.mode('overwrite').saveAsTable(output_table)

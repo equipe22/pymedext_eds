@@ -1,0 +1,20 @@
+# Configuration file for pipeline med 
+
+[INPUT]
+schema: coronaomop_unstable
+table: note
+limit: 1000
+
+[OUTPUT]
+schema: coronaomop_unstable
+table: note_nlp_medoc_v2
+write_mode: full
+
+[PROCESS]
+process: cuda
+
+[RAY_PARAMETERS]
+num_replica: 10
+num_gpus: 1
+doc_batch_size: 10
+sentence_batch_size: 128

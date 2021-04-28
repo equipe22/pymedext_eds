@@ -5,10 +5,10 @@ from airflow.utils.dates import days_ago
 import os
 
 work_path = "/export/home/edsdev/app/bigdata/pymedext/"
-main_path = os.path.join(work_path, 'lib/run_ray.py')
+main_path = os.path.join(work_path, 'lib/run_pipeline_med.py')
 conf_path = os.path.join(work_path, "conf_dev.cf")
 run_path_match = os.path.join(work_path, 'bin/launch_pipeline_med.sh')
-env_path = os.path.join(work_path, 'envs/med_env.tar.gz')
+env_path = os.path.join(work_path, 'envs/med_env')
 
 default_args = {
     'owner': 'airflow',
