@@ -53,6 +53,8 @@ deploy-to-development:
     - cp dag/*_dev.py $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp -r bin $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp -r pymedext_eds $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp deploy.py $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp run_pipeline_med.py $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp config/*_dev.cf $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
     - mkdir -p $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs
     - cp packages/med_env.tar.gz $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs/
