@@ -78,7 +78,7 @@ if __name__ == '__main__':
             sql(f"select person_id, note_datetime, note_id, note_text from {args.input_table}")
             .dropna(subset="note_text")
             .filter(F.col('note_class_source_value').isin(list_cr))
-            .limit(args.limit)
+            .limit(int(args.limit))
             .toPandas()
         )
     elif args.write_mode == "append":
@@ -89,16 +89,16 @@ if __name__ == '__main__':
             .dropna(subset="note_text")
             .filter(F.col('note_class_source_value').isin(list_cr))
             .join(df_old_note, on="note_id", how="left_anti")
-            .limit(args.limit)
+            .limit(int(args.limit))
             .toPandas()
         )
     
     run_pipeline(
-        num_replicas=args.num_replica, 
-        num_gpus=args.num_gpus, 
-        doc_batch_size=args.doc_batch_size, 
+        num_replicas=int(args.num_replica), 
+        num_gpus=int(args.num_gpus), 
+        doc_batch_size=int(args.doc_batch_size), 
         batch_wait_timeout=.5, 
-        sentence_batch_size=args.sentence_batch_size,
+        sentence_batch_size=int(args.sentence_batch_size),
     )
     
     ### launch client
