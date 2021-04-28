@@ -29,7 +29,7 @@ before_script:
 
 stages:
   - package
-  - deploy-to-dev
+  - deploy-to-prod
 
 package:
   stage: package
@@ -40,23 +40,25 @@ package:
   when: manual
 
 deploy-to-development:
-  stage: deploy-to-dev
+  stage: deploy-to-prod
   environment:
     name: development
   script:
-    - echo "Deploying the package to EDS cluster in the DEV environment"
+    - echo "Deploying the package to EDS cluster in the PROD environment"
     - cd ../
-    - rm -rf $DEV_DELIVERY_PATH/$CI_PROJECT_NAME || true
-    - rm -rf $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
-    - mkdir -p $DEV_DELIVERY_PATH/$CI_PROJECT_NAME
-    - mkdir -p $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
-    - cp dag/*_dev.py $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp -r bin $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp -r pymedext_eds $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp config/*_dev.cf $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - mkdir -p $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs
-    - cp packages/med_env.tar.gz $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs/
-    - cp requirements.txt $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - chown -R 20015:20015 $DEV_DELIVERY_PATH/$CI_PROJECT_NAME
-    - chown -R 20015:20015 $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+    - rm -rf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - rm -rf $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - mkdir -p $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
+    - mkdir -p $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+    - cp dag/*_prod.py $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r bin $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r pymedext_eds $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp deploy.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp run_pipeline_med.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp config/*_prod.cf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - mkdir -p $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/envs
+    - cp packages/med_env.tar.gz $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/envs/
+    - cp requirements.txt $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - chown -R 20015:20015 $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
+    - chown -R 20015:20015 $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
   when: manual
