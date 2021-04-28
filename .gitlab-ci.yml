@@ -1,0 +1,62 @@
+image: $CI_REGISTRY/bigdata/algorithms/match_sivic/continuumio/miniconda3:latest
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  DEV_DELIVERY_PATH: "/export/home/edsdev/app/bigdata/"
+  QUA_DELIVERY_PATH: "/export/home/edsqua/app/bigdata/"
+  PRD_DELIVERY_PATH: "/export/home/edsprod/app/bigdata/"
+  DEV_AIRFLOW_DELIVERY_PATH: "/export/home/edsdev/airflow/dags/bigdata/"
+  QUA_AIRFLOW_DELIVERY_PATH: "/export/home/edsqua/airflow/dags/bigdata/"
+  PRD_AIRFLOW_DELIVERY_PATH: "/export/home/edsprod/airflow/dags/bigdata/"
+
+cache:
+  paths:
+    - .cache/pip
+    - packages/
+    - /opt/conda/
+
+before_script:
+  - export http_proxy=http://proxym-inter.aphp.fr:8080
+  - export https_proxy=http://proxym-inter.aphp.fr:8080
+  - python -V
+  - conda create --name med_env python=3.7
+  - source activate med_env
+  - pip install -r requirements.txt
+  - (if [ -d packages ]; then echo "packages found"; else mkdir packages; fi);
+  - cd packages
+  - (if [ -f med_env.tar.gz ]; then rm med_env.tar.gz; else echo "env does not exist yet"; fi); 
+  - conda pack -o med_env.tar.gz
+
+stages:
+  - package
+  - deploy-to-dev
+
+package:
+  stage: package
+  script:
+    - cd ../lib
+    - python setup.py bdist_egg
+    - cp dist/* ../packages/
+  when: manual
+
+deploy-to-development:
+  stage: deploy-to-dev
+  environment:
+    name: development
+  script:
+    - echo "Deploying the package to EDS cluster in the DEV environment"
+    - cd ../
+    - rm -rf $DEV_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - rm -rf $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - mkdir -p $DEV_DELIVERY_PATH/$CI_PROJECT_NAME
+    - mkdir -p $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+    - cp dag/*_dev.py $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r bin $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r pymedext_eds $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp config/*_dev.cf $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - mkdir -p $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs
+    - cp packages/med_env.tar.gz $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/envs/
+    - cp requirements.txt $DEV_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - chown -R 20015:20015 $DEV_DELIVERY_PATH/$CI_PROJECT_NAME
+    - chown -R 20015:20015 $DEV_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+  when: manual
