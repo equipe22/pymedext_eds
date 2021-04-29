@@ -28,16 +28,7 @@ before_script:
   - conda pack -o med_env.tar.gz
 
 stages:
-  - package
   - deploy-to-prod
-
-package:
-  stage: package
-  script:
-    - cd ../lib
-    - python setup.py bdist_egg
-    - cp dist/* ../packages/
-  when: manual
 
 deploy-to-production:
   stage: deploy-to-prod
