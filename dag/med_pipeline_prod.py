@@ -4,7 +4,7 @@ from datetime import timedelta
 from airflow.utils.dates import days_ago
 import os
 
-work_path = "/export/home/edsprod/app/bigdata/pymedext/"
+work_path = "/export/home/edsprod/app/bigdata/pymedext-eds/"
 main_path = os.path.join(work_path, 'run_pipeline_med.py')
 conf_path = os.path.join(work_path, "conf_pipeline_med.cf")
 run_path_match = os.path.join(work_path, 'bin/launch_pipeline_med.sh')
