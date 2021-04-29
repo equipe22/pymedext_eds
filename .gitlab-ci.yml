@@ -17,18 +17,18 @@ deploy-to-production:
   environment:
     name: prod
   script:
-    - echo "Deploying the package to EDS cluster in the PROD environment"
-    - rm -rf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME || true
-    - rm -rf $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
-    - mkdir -p $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
-    - mkdir -p $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
-    - cp dag/med_pipeline_prod.py $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp -r bin $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp -r pymedext_eds $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp deploy.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp run_pipeline_med.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp conf/conf_pipeline_med.cf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp requirements.txt $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - chown -R 20015:20015 $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
-    - chown -R 20015:20015 $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+    - echo "Deploying the package to EDS cluster in the PRD environment"
+    - rm -rf $PRD_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - rm -rf $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
+    - mkdir -p $PRD_DELIVERY_PATH/$CI_PROJECT_NAME
+    - mkdir -p $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
+    - cp dag/med_pipeline_prod.py $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r bin $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp -r pymedext_eds $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp deploy.py $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp run_pipeline_med.py $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp conf/conf_pipeline_med.cf $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp requirements.txt $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - chown -R 20015:20015 $PRD_DELIVERY_PATH/$CI_PROJECT_NAME
+    - chown -R 20015:20015 $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
   when: manual
