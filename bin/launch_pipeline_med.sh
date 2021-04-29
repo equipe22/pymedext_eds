@@ -1,8 +1,8 @@
 #!/bin/bash
 
-MAIN_PATH=$1
-CONF_PATH=$2
-ENV_PATH=$3
+MAIN_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/run_pipeline_med.py"
+CONF_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/conf_pipeline_med.cf"
+ENV_PATH="/export/home/edsprod/app/bigdata/env_pkg/med_env.tar.gz"
 
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
