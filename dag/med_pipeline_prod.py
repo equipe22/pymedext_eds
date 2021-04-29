@@ -10,6 +10,8 @@ conf_path = os.path.join(work_path, "conf_pipeline_med.cf")
 run_path_match = os.path.join(work_path, 'bin/launch_pipeline_med.sh')
 env_path = "/export/home/edsprod/app/bigdata/env_pkg/med_env.tar.gz"
 
+# bash_command="ssh gpu " + run_path_match + " " + main_path + " " + conf_path + " " + env_path
+
 default_args = {
     'owner': 'airflow',
     'catchup': False,
@@ -27,7 +29,7 @@ dag = DAG('Detection_Medicaments', description='detection medicaments',
 with dag:
     match_sivic = BashOperator(
         task_id='detect_med',
-        bash_command="ssh gpu " + run_path_match + " " + main_path + " " + conf_path + " " + env_path,
+        bash_command="ssh gpu '/export/home/edsprod/app/bigdata/pymedext-eds/run_pipeline_med.py' ",
         dag=dag,
     )
 
