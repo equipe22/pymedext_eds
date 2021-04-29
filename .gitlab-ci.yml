@@ -18,12 +18,11 @@ deploy-to-production:
     name: prod
   script:
     - echo "Deploying the package to EDS cluster in the PROD environment"
-    - cd ../
     - rm -rf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME || true
     - rm -rf $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME || true
     - mkdir -p $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
     - mkdir -p $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
-    - cp dag/*_prod.py $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - cp dag/med_pipeline_prod.py $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp -r bin $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp -r pymedext_eds $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp deploy.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
