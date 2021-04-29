@@ -27,7 +27,7 @@ dag = DAG('Detection_Medicaments', description='detection medicaments',
 with dag:
     match_sivic = BashOperator(
         task_id='detect_med',
-        bash_command="sh" + " "+ run_path_match + " " + main_path + " " + conf_path + " " + env_path,
+        bash_command="ssh gpu " + run_path_match + " " + main_path + " " + conf_path + " " + env_path,
         dag=dag,
     )
 
