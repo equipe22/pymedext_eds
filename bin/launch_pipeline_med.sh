@@ -4,8 +4,6 @@ MAIN_PATH=$1
 CONF_PATH=$2
 ENV_PATH=$3
 
-source $ENV_PATH/bin/activate
-
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
 --master local[2] \
@@ -15,4 +13,6 @@ $SPARK_HOME/bin/spark-submit \
 --conf spark.ui.enabled=true \
 --conf spark.driver.memoryOverhead=5g \
 --conf "spark.driver.extraJavaOptions=-Dhttp.proxyHost=proxym-inter.aphp.fr -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxym-inter.aphp.fr -Dhttps.proxyPort=8080" \
+--archives $ENV_PATH#med_env \
+--conf spark.yarn.appMasterEnv.PYSPARK_PYTHON=./med_env/bin/python \
 $MAIN_PATH $CONF_PATH
