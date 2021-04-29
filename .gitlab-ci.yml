@@ -9,24 +9,6 @@ variables:
   QUA_AIRFLOW_DELIVERY_PATH: "/export/home/edsqua/airflow/dags/bigdata/"
   PRD_AIRFLOW_DELIVERY_PATH: "/export/home/edsprod/airflow/dags/bigdata/"
 
-cache:
-  paths:
-    - .cache/pip
-    - packages/
-    - /opt/conda/
-
-before_script:
-  - export http_proxy=http://proxym-inter.aphp.fr:8080
-  - export https_proxy=http://proxym-inter.aphp.fr:8080
-  - python -V
-  - conda create --name med_env python=3.7
-  - source activate med_env
-  - pip install -r requirements.txt
-  - (if [ -d packages ]; then echo "packages found"; else mkdir packages; fi);
-  - cd packages
-  - (if [ -f med_env.tar.gz ]; then rm med_env.tar.gz; else echo "env does not exist yet"; fi); 
-  - conda pack -o med_env.tar.gz
-
 stages:
   - deploy-to-prod
 
@@ -46,9 +28,7 @@ deploy-to-production:
     - cp -r pymedext_eds $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp deploy.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp run_pipeline_med.py $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - cp config/*_prod.cf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
-    - mkdir -p $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/envs
-    - cp packages/med_env.tar.gz $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/envs/
+    - cp conf/conf_pipeline_med.cf $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - cp requirements.txt $PROD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - chown -R 20015:20015 $PROD_DELIVERY_PATH/$CI_PROJECT_NAME
     - chown -R 20015:20015 $PROD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
