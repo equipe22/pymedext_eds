@@ -57,22 +57,22 @@ class Pipeline:
 
         self.models_param = [
             {
-                'tagger_path': 'data/models/apmed5/entities/final-model.pt',
+                'tagger_path': '/export/home/esdprod/app/bigdata/models/medicaments/models/apmed5/entities/final-model.pt',
                 'tag_name': 'entity_pred'
             },
             {
-                'tagger_path': 'data/models/apmed5/events/final-model.pt',
+                'tagger_path': '/export/home/esdprod/app/bigdata/models/medicaments/models/apmed5/events/final-model.pt',
                 'tag_name': 'event_pred'
             },
             {
-                'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
+                'tagger_path': "/export/home/esdprod/app/bigdata/models/medicaments/models/apmed5/drugblob/final-model.pt",
                 'tag_name': 'drugblob_pred'
             },
         ]
 
         self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
 
-        data_path = pkg_resources.resource_filename('pymedext_eds', 'data/romedi')
+        data_path = pkg_resources.resource_filename('/export/home/esdprod/app/bigdata/models/medicaments/', 'romedi')
         romedi_path = glob(data_path + '/*.p')[0]
 
         self.norm = MedicationNormalizer(['ENT/DRUG', 'ENT/CLASS'], 'normalized_mention', ID='norm',
