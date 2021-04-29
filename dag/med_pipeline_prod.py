@@ -8,7 +8,7 @@ work_path = "/export/home/edsprod/app/bigdata/pymedext/"
 main_path = os.path.join(work_path, 'lib/run_pipeline_med.py')
 conf_path = os.path.join(work_path, "conf_pipeline_med.cf")
 run_path_match = os.path.join(work_path, 'bin/launch_pipeline_med.sh')
-env_path = os.path.join(work_path, 'envs/med_env')
+env_path = "/export/home/edsprod/app/bigdata/env_pkg/med_env.tar.gz"
 
 default_args = {
     'owner': 'airflow',
