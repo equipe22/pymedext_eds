@@ -183,13 +183,14 @@ class SentenceTokenizer(Annotator):
         end = 0
 
         for inp in inps:
-
-            if inp.attributes is None:
-                attributes = None
-            else:
-                attributes = inp.attributes.copy()
-
+            
             for sent in re.split(r'([\r\n;\?!.])', inp.value):
+                
+                if inp.attributes is None:
+                    attributes = None
+                else:
+                    attributes = inp.attributes.copy()
+                
                 if sent in ['.','', ' ', ';']:
                     continue
 
