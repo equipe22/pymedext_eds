@@ -39,10 +39,10 @@ package:
     - cp dist/* ../packages/
   when: manual
 
-deploy-to-development:
+deploy-to-production:
   stage: deploy-to-prod
   environment:
-    name: development
+    name: prod
   script:
     - echo "Deploying the package to EDS cluster in the PROD environment"
     - cd ../
