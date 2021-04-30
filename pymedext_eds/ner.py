@@ -24,13 +24,6 @@ from pymedextcore.annotators import Annotator, Annotation
 from flair.models import SequenceTagger, MultiTagger
 from flair.data import Sentence
 
-from .pyromedi.romedi import Romedi
-from .constants import CLASS_NORM
-from .normalisation import clean_drug, clean_class, clean_freq, clean_dose
-
-import faiss
-import pandas as pd
-import numpy as np
 
     
 
@@ -39,6 +32,7 @@ class NERAnnotator(Annotator):
                  models_param,
                  mini_batch_size = 1000,
                  emb_key = '0-transformer-word-data/embeddings/bert-base-medical-huge-cased/checkpoint-800000/',
+                 reduce_embedding = True,
                  device="cpu"): 
         
         super().__init__(key_input, key_output, ID)
@@ -46,6 +40,7 @@ class NERAnnotator(Annotator):
         self.store_embedding_tag = []
         self.store_embedding_labels = []
         self.emb_key = emb_key
+        self.reduce_embedding = reduce_embedding
         self.mini_batch_size = mini_batch_size
         flair.device = torch.device(device)
         
@@ -80,6 +75,8 @@ class NERAnnotator(Annotator):
                 emb_labels = [t[1] for t in emb_labels if len(t)==2]
                 emb_labels = list(set(emb_labels))
                 self.store_embedding_labels.extend(emb_labels)
+        
+        self.emb_size = 3072
 
 
     def infer_flair(self, sentences):
@@ -149,7 +146,13 @@ class NERAnnotator(Annotator):
             
             if label.value in self.store_embedding_labels:
                 token_list = [t._embeddings[self.emb_key].reshape(1, -1) for t in entity.tokens]
-                ent_embedding = torch.cat(token_list , axis = 0).mean(axis=0).numpy()
+                if self.reduce_embedding:
+                    ent_embedding = torch.cat(token_list , axis = 0).mean(axis=0).numpy()
+                else:
+                    ent_embedding = torch.cat(token_list , axis = 0).numpy()
+                
+                ent_embedding = ent_embedding.reshape(-1, self.emb_size)
+
             else:
                 ent_embedding = None
             # filter out events
@@ -437,117 +440,3 @@ class NERAnnotator(Annotator):
         return res
 
     
-
-
-class NERNormalizer(Annotator):
-    def __init__(self, key_input, key_output, ID, romedi_path, class_norm = CLASS_NORM): 
-        
-        super().__init__(key_input, key_output, ID)
-        
-        self.romedi = Romedi(from_cache=romedi_path)
-        self.class_norm = class_norm
-                
-        self.cache_mentions = {"ENT/DRUG":{},
-                               "ENT/CLASS":{},
-                               "ENT/FREQ":{},
-                               "ENT/DOSE":{}
-                              }
-    
-    
-
-    def normalize(self, ent_type, mention): 
-        if mention.lower() in self.cache_mentions[ent_type].keys(): 
-            return self.cache_mentions[ent_type][mention.lower()]
-        else: 
-            if ent_type == 'ENT/DRUG':
-                cleaned = clean_drug(mention, self.romedi)
-            elif ent_type == 'ENT/CLASS':
-                cleaned = clean_class(mention, self.class_norm)
-            elif ent_type == 'ENT/FREQ': 
-                cleaned = clean_freq(mention)
-            elif ent_type == 'ENT/DOSE': 
-                cleaned = clean_dose(mention)
-            else:
-                raise NotImplmentedError
-
-            self.cache_mentions[ent_type][mention.lower()] = cleaned
-            return cleaned
-         
-    
-    def annotate_function(self, _input):
-        
-        inps = self.get_all_key_input(_input)
-        
-        for annot in inps:
-            annot.attributes[self.key_output] = self.normalize(annot.type, annot.value)
-            
-            if 'ENT/DOSE' in annot.attributes.keys() or 'ENT/FREQ' in annot.attributes.keys():
-                for k,v in annot.attributes.items(): 
-                    if k == 'ENT/DOSE':
-                        for att in v:
-                            att[self.key_output] = self.normalize('ENT/DOSE', att['value'])
-                    elif k == 'ENT/FREQ':
-                        for att in v:
-                            att[self.key_output] = self.normalize('ENT/FREQ', att['value'])
-
-                            
-class NormPheno(Annotator):
-    
-    def __init__(self, key_input, key_output, ID, path_dict): 
-        super().__init__(key_input, key_output, ID)
-        
-        self.path_dict=path_dict
-
-        emb = pd.read_csv(path_dict, header=None)
-        self.dict_label = {k:(v[0], v[1]) for k,v in emb.iloc[:,:2].iterrows()}
-        matrix_embeddings = np.ascontiguousarray(emb.iloc[:,2:].values.astype('float32'))
-        
-
-        #to faiss
-        self.index_embedding = faiss.index_factory(matrix_embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
-        faiss.normalize_L2(matrix_embeddings)
-        self.index_embedding.add(matrix_embeddings)
-
-        
-    def annotate_function(self, _input):
-        
-        #get annotations
-        ner_annotations = self.get_all_key_input(_input)
-        res = []
-        
-        #get embeddings
-        embedding_list_annotation=[]
-        for annotation in ner_annotations:
-            embedding_list_annotation.append(self.get_embedding(annotation).reshape((1,-1)))
-        matrix_list_annotation=np.concatenate(embedding_list_annotation)
-        
-        #find nearest
-        nearest_neighbors=self.find_closest_embeddings(matrix_list_annotation, k = 1)
-        
-        for index, annotation in enumerate(ner_annotations):    
-            #get first match
-            index, distance = nearest_neighbors[index][0]
-            cui, cui_label = self.dict_label[index]
-
-            res.append(Annotation(
-                type = "normalized_mention",
-                value = cui_label ,
-                span = annotation.span,
-                source = self.ID,
-                source_ID = annotation.source_ID,
-                attributes = {'score_cos':distance, "mention" : annotation.value, 'cui':cui, 'label': cui_label, **annotation.attributes})
-                      )
-        
-        return res        
-
-    
-    def get_embedding(self, annotation):
-        return annotation.attributes.pop('embedding')
-    
-    
-    def find_closest_embeddings(self, annotation, k):
-        
-        faiss.normalize_L2(annotation)
-        D, I = self.index_embedding.search(annotation, k) # sanity check
-        
-        return np.dstack((I,D))
