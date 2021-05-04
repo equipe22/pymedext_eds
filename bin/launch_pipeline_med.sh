@@ -8,9 +8,9 @@ if [ -d med_env ]; then
     echo "env found" 
 else 
     mkdir med_env
+    tar -xzf $ENV_PATH -C med_env 
 fi;
 
-tar -xzf $ENV_PATH -C med_env 
 source med_env/bin/activate
 
 $SPARK_HOME/bin/spark-submit \
