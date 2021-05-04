@@ -31,6 +31,7 @@ deploy-to-production:
     - cp requirements.txt $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
     - mkdir -p $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/data
     - cp $PRD_DELIVERY_PATH/models/medicaments/* $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/data/
+    - chmod u+x $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/bin/*.sh
     - chown -R 20015:20015 $PRD_DELIVERY_PATH/$CI_PROJECT_NAME
     - chown -R 20015:20015 $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
   when: manual
