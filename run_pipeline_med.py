@@ -87,7 +87,7 @@ if __name__ == '__main__':
            "CRH-NEONAT", "CRH-NEUROP", "CRH-EVOL", "LT-ORDO", "BMI", "PRESC-AUTRE", "PRESC-MEDIC", "CR-URGE", "LT-CONS-I", 
            "LT-TYPE", "LT-CRH", "LT-ORDO", "LT-CONS-S", "LT-SOR", "LT-CRT", "LT-CONS", "LT-AUTR"]
     
-    if args.write_mode == "full":
+    if write_mode == "full":
         df_note = (
             sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
             .dropna(subset="note_text")
@@ -95,7 +95,7 @@ if __name__ == '__main__':
             .limit(limit)
             .toPandas()
         )
-    elif args.write_mode == "append":
+    elif write_mode == "append":
         df_old_note = sql(f"select * from {output_schema}.{output_table}")
         df_note = sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
         df_note = (
@@ -144,10 +144,10 @@ if __name__ == '__main__':
     
     df_note_spark_to_add = spark.createDataFrame(result,schema=note_schema)
     
-    if args.write_mode == "full":
+    if write_mode == "full":
         sql(f"USE {output_schema}")
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
-    elif args.write_mode == "append":
+    elif write_mode == "append":
         sql(f"USE {output_schema}")
         df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
         df_note_nlp_all.write.mode('overwrite').saveAsTable(output_table)
