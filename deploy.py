@@ -142,8 +142,6 @@ class Pipeline:
 
             note_nlp_item = {
                 'note_nlp_id': None,
-                'note_id': note_id,
-                'person_id': person_id,
                 'section_concept_id': section,
                 'snippet': sentence,
                 'offset_begin': drug['span'][0],
