@@ -71,7 +71,7 @@ if __name__ == '__main__':
     
     process = config_object["PROCESS"]["process"]
     
-    num_replica = int(config_object["RAY_PARAMETERS"]["num_replica"])
+    num_replicas = int(config_object["RAY_PARAMETERS"]["num_replica"])
     num_gpus = int(config_object["RAY_PARAMETERS"]["num_gpus"])
     doc_batch_size = int(config_object["RAY_PARAMETERS"]["doc_batch_size"])
     sentence_batch_size = int(config_object["RAY_PARAMETERS"]["sentence_batch_size"])
