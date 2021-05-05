@@ -79,6 +79,7 @@ if __name__ == '__main__':
     #### Read data 
     spark = SparkSession.builder \
             .appName("extract") \
+            .enableHiveSupport() \
             .getOrCreate()
     sql = spark.sql
     
