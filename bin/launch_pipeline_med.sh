@@ -2,16 +2,16 @@
 
 MAIN_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/run_pipeline_med.py"
 CONF_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/conf_pipeline_med.cf"
-ENV_PATH="/export/home/edsprod/app/bigdata/env_pkg/med_env.tar.gz"
+ENV_PATH="/export/home/edsprod/med_env"
 
-if [ -d med_env ]; then 
-    echo "env found" 
-else 
-    mkdir med_env
-    tar -xzf $ENV_PATH -C med_env 
-fi;
+# if [ -d med_env ]; then 
+#     echo "env found" 
+# else 
+#     mkdir med_env
+#     tar -xzf $ENV_PATH -C med_env 
+# fi;
 
-source med_env/bin/activate
+source $ENV_PATH/bin/activate
 
 export http_proxy=http://proxym-inter.aphp.fr:8080
 export https_proxy=http://proxym-inter.aphp.fr:8080
