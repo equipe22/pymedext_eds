@@ -72,7 +72,7 @@ class Pipeline:
 
         self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
 
-        data_path = pkg_resources.resource_filename('data/', 'romedi')
+        data_path = pkg_resources.resource_filename('pymedext_eds', 'data/romedi')
         romedi_path = glob(data_path + '/*.p')[0]
 
         self.norm = MedicationNormalizer(['ENT/DRUG', 'ENT/CLASS'], 'normalized_mention', ID='norm',
@@ -142,8 +142,6 @@ class Pipeline:
 
             note_nlp_item = {
                 'note_nlp_id': None,
-                'note_id': note_id,
-                'person_id': person_id,
                 'section_concept_id': section,
                 'snippet': sentence,
                 'offset_begin': drug['span'][0],

@@ -16,6 +16,8 @@ import time
 import datetime
 import pandas as pd
 import argparse
+import pandas as pd
+import json
 
 from deploy import run_pipeline
 
@@ -37,13 +39,14 @@ def main_process(
     df_note['results'] = ray.get([put_request.remote(text) for text in df_note.note_text])
     
     df_note = df_note.explode("results")
-    list_col = ['note_nlp_id', 'note_id', 'person_id', 'section_concept_id', 'snippet', 'offset_begin', 'offset_end', 'lexical_variant', 
-                'note_nlp_concept_id', 'note_nlp_source_concept_id', 'note_nlp_source_concept_id', 'nlp_system', 'nlp_date', 'nlp_datetime', 
-               'term_exists', 'term_temporal', 'term_modifiers', 'validation_level_id']
     
-    df_note[list_col]= df_note["results"].apply(pd.Series)
+    json_struct = json.loads(df_note.to_json(orient="records"))    
+    df_flat = pd.io.json.json_normalize(json_struct)
+    
+    for c in df_flat.columns[4:-1]:
+        df_flat = df_flat.rename(columns={c: c.split(".")[1]})
 
-    return df_note
+    return df_flat
 
 
 if __name__ == '__main__':
