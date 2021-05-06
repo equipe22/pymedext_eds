@@ -115,7 +115,7 @@ if __name__ == '__main__':
         )
     elif write_mode == "append":
         df_old_note = sql(f"select * from {output_schema}.{output_table}")
-        df_note = sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
+        df_note = sql(f"select person_id, note_datetime, note_id, note_text, note_class_source_value from {input_schema}.{input_table}")
         df_note = (
             df_note
             .dropna(subset="note_text")
