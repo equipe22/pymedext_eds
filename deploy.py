@@ -190,7 +190,8 @@ class Pipeline:
                 placeholder_doc.annotate([self.med, self.norm])
         except:
             pass
-            
+        
+        logger.info(f"lg placeholder : {placeholder_doc.get_annotations('ENT/DRUG')}")
         for annotation in placeholder_doc.get_annotations('ENT/DRUG'):
             i = annotation.attributes['doc_id']
             del annotation.attributes['doc_id']
