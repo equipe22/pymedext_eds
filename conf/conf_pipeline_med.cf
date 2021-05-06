@@ -14,7 +14,7 @@ write_mode: full
 process: cuda
 
 [RAY_PARAMETERS]
-num_replica: 10
+num_replica: 8
 num_gpus: 1
 doc_batch_size: 10
 sentence_batch_size: 128
