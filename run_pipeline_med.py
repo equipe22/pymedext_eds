@@ -51,6 +51,8 @@ def main_process(
     df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
     df_flat["note_datetime"] = pd.to_datetime(df_flat["note_datetime"])
 
+    df_flat = df_flat.drop("results", axis=1)
+
     return df_flat
 
 
