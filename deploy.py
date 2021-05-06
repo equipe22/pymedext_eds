@@ -57,15 +57,15 @@ class Pipeline:
 
         self.models_param = [
             {
-                'tagger_path': 'data/models/apmed5/entities/final-model.pt',
+                'tagger_path': '/export/home/edsprod/app/bigdatda/pymedext-eds/data/models/apmed5/entities/final-model.pt',
                 'tag_name': 'entity_pred'
             },
             {
-                'tagger_path': 'data/models/apmed5/events/final-model.pt',
+                'tagger_path': '/export/home/edsprod/app/bigdatda/pymedext-eds/data/models/apmed5/events/final-model.pt',
                 'tag_name': 'event_pred'
             },
             {
-                'tagger_path': "data/models/apmed5/drugblob/final-model.pt",
+                'tagger_path': "/export/home/edsprod/app/bigdatda/pymedext-eds/data/models/apmed5/drugblob/final-model.pt",
                 'tag_name': 'drugblob_pred'
             },
         ]
