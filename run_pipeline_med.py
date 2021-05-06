@@ -109,7 +109,6 @@ if __name__ == '__main__':
         df_note = (
             sql(f"select person_id, note_datetime, note_id, note_text, note_class_source_value from {input_schema}.{input_table}")
             .dropna(subset="note_text")
-            .filter(F.col('note_class_source_value').isin(list_cr))
             .limit(limit)
             .toPandas()
         )
