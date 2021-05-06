@@ -52,7 +52,7 @@ def main_process(
 
     print(df_flat.head())
     
-    for c in df_flat.columns[4:-1]:
+    for c in df_flat.columns[5:-1]:
         df_flat = df_flat.rename(columns={c: c.split(".")[1]})
 
     print(df_flat.columns)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     
     if write_mode == "full":
         df_note = (
-            sql(f"select person_id, note_datetime, note_id, note_text from {input_schema}.{input_table}")
+            sql(f"select person_id, note_datetime, note_id, note_text, note_class_source_value from {input_schema}.{input_table}")
             .dropna(subset="note_text")
             .filter(F.col('note_class_source_value').isin(list_cr))
             .limit(limit)
@@ -143,6 +143,7 @@ if __name__ == '__main__':
             T.StructField("note_datetime", T.TimestampType(), True),
             T.StructField("note_id", T.LongType(), True),
             T.StructField("note_text", T.StringType(), True),
+            T.StructField("note_class_source_value", T.StringType(), True),
             T.StructField("note_nlp_id", T.DoubleType(), True),
             T.StructField("section_concept_id", T.StringType(), True),
             T.StructField("snippet", T.StringType(), True),
