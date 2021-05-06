@@ -41,27 +41,15 @@ def main_process(
     # Gère la parallèlisation automatiquement
     df_note['results'] = ray.get([put_request.remote(text) for text in df_note.note_text])
     
-    print(df_note.head())
     df_note1 = df_note.explode("results")
     df_note1 = df_note1.dropna(subset=["results"])
 
-    print(df_note1.shape)
-    print(df_note1.head())
-    json_struct = json.loads(df_note1.to_json(orient="records"))    
-    df_flat = pd.json_normalize(json_struct)
 
-    print(df_flat.head())
-    
-    for c in df_flat.columns[5:-1]:
-        df_flat = df_flat.rename(columns={c: c.split(".")[1]})
+    df_flat = pd.concat([df_note1, df_note1.results.apply(pd.Series)], axis=1)
 
-    print(df_flat.columns)
-    
     df_flat["nlp_date"] = pd.to_datetime(df_flat["nlp_date"])
     df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
     df_flat["note_datetime"] = pd.to_datetime(df_flat["note_datetime"])
-
-    df_flat = df_flat.drop("results", axis=1)
 
     return df_flat
 
