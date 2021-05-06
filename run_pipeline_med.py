@@ -41,10 +41,14 @@ def main_process(
     # Gère la parallèlisation automatiquement
     df_note['results'] = ray.get([put_request.remote(text) for text in df_note.note_text])
     
+    print(df_note.head())
     df_note1 = df_note.explode("results")
     
+    print(df_note1.head())
     json_struct = json.loads(df_note1.to_json(orient="records"))    
-    df_flat = pd.io.json.json_normalize(json_struct)
+    df_flat = pd.json_normalize(json_struct)
+
+    print(df_flat.head())
     
     for c in df_flat.columns[4:-1]:
         df_flat = df_flat.rename(columns={c: c.split(".")[1]})
