@@ -29,7 +29,7 @@ dag = DAG('Detection_Medicaments', description='detection medicaments',
 with dag:
     match_sivic = BashOperator(
         task_id='detect_med',
-        bash_command="ssh gpu '/export/home/edsprod/app/bigdata/pymedext-eds/bin/launch_pipeline_med.sh' ",
+        bash_command="ssh gpu 'cd /export/home/edsprod/app/bigdata/pymedext-eds && /export/home/edsprod/app/bigdata/pymedext-eds/bin/launch_pipeline_med.sh' ",
         dag=dag,
     )
 
