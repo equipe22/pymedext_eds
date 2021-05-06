@@ -43,7 +43,9 @@ def main_process(
     
     print(df_note.head())
     df_note1 = df_note.explode("results")
-    
+    df_note1 = df_note1.dropna(subset=["results"])
+
+    print(df_note1.shape)
     print(df_note1.head())
     json_struct = json.loads(df_note1.to_json(orient="records"))    
     df_flat = pd.json_normalize(json_struct)
