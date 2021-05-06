@@ -170,7 +170,6 @@ class Pipeline:
         """
         
         docs = [Document(doc) for doc in documents]
-        logger.info(f"len doc 0: {len(documents[0])}")
         
         for doc in docs:
             doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
@@ -189,8 +188,7 @@ class Pipeline:
         with torch.no_grad():
             placeholder_doc.annotate([self.med, self.norm])
             
-        logger.info(f"lg placeholder : {placeholder_doc.get_annotations('ENT/DRUG')}")
-        for annotation in placeholder_doc.get_annotations('ENT/DRUG'):
+        for annotation in placeholder_doc.get_annotations('ENT/DRUG') + placeholder_doc.get_annotations('ENT/CLASS'):
             i = annotation.attributes['doc_id']
             del annotation.attributes['doc_id']
             
