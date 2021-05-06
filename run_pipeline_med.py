@@ -48,6 +48,12 @@ def main_process(
     
     for c in df_flat.columns[4:-1]:
         df_flat = df_flat.rename(columns={c: c.split(".")[1]})
+    
+    df_flat["nlp_date"] = pd.to_datetime(df_flat["nlp_date"])
+    df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
+    df_flat["note_datetime"] = pd.to_datetime(df_flat["note_datetime"])
+
+    df_flat = df_flat.drop("results", axis=1)
 
     return df_flat
 
@@ -125,17 +131,18 @@ if __name__ == '__main__':
     ### write in database
     note_schema = (
         T.StructType([
-            T.StructField("note_nlp_id", T.LongType(), True),
-            T.StructField("note_id", T.LongType(), True),
             T.StructField("person_id", T.StringType(), True),
+            T.StructField("note_datetime", T.TimestampType(), True),
+            T.StructField("note_id", T.LongType(), True),
             T.StructField("note_text", T.StringType(), True),
+            T.StructField("note_nlp_id", T.DoubleType(), True),
             T.StructField("section_concept_id", T.StringType(), True),
             T.StructField("snippet", T.StringType(), True),
             T.StructField("offset_begin", T.DoubleType(), True),
-            T.StructField("offset_begin", T.DoubleType(), True),
+            T.StructField("offset_end", T.DoubleType(), True),
             T.StructField("lexical_variant", T.StringType(), True),
-            T.StructField("note_nlp_concept_id", T.DoubleType(), True),
-            T.StructField("note_nlp_source_concept_id", T.DoubleType(), True),
+            T.StructField("note_nlp_concept_id", T.StringType(), True),
+            T.StructField("note_nlp_source_concept_id", T.StringType(), True),
             T.StructField("nlp_system", T.StringType(), True),
             T.StructField("nlp_date", T.TimestampType(), True),
             T.StructField("nlp_datetime", T.TimestampType(), True),
