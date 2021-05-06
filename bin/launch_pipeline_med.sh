@@ -13,6 +13,9 @@ fi;
 
 source med_env/bin/activate
 
+export http_proxy=http://proxym-inter.aphp.fr:8080
+export https_proxy=http://proxym-inter.aphp.fr:8080
+
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
 --master local[5] \
