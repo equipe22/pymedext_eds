@@ -108,7 +108,6 @@ if __name__ == '__main__':
         df_note = (
             df_note
             .dropna(subset="note_text")
-            .filter(F.col('note_class_source_value').isin(list_cr))
             .join(df_old_note, on="note_id", how="left_anti")
             .limit(limit)
             .toPandas()
