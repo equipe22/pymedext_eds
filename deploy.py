@@ -162,7 +162,7 @@ class Pipeline:
 
         return res
 
-    def process(self, documents: List[Dict[str]]):
+    def process(self, documents):
         """
         Does the heavy lifting.
         
