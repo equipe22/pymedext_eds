@@ -26,8 +26,8 @@ from deploy import run_pipeline
 
 
 @ray.remote
-def put_request(text):
-    res = requests.post(f"http://127.0.0.1:8000/annotator", json=text)
+def put_request(note_text, note_id):
+    res = requests.post(f"http://127.0.0.1:8000/annotator", json=dict(note_id=note_id, note_text=note_text))
     return res.json()  
 
 
@@ -39,7 +39,10 @@ def main_process(
     logger.info(f"{len(df_note)} documents to process")
     
     # Gère la parallèlisation automatiquement
-    df_note['results'] = ray.get([put_request.remote(text) for text in df_note.note_text])
+    df_note['results'] = ray.get([
+        put_request.remote(note_text) 
+        for note_text, note_id in zip(df_note.note_text, df_note.note_id)
+    ])
     
     df_note1 = df_note.explode("results")
     df_note1 = df_note1.dropna(subset=["results"])

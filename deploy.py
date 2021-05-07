@@ -18,7 +18,7 @@ from tqdm import tqdm
 from ray.serve.utils import _get_logger
 logger = _get_logger()
 
-from typing import List
+from typing import List, Dict
 
 from ray.serve.utils import _get_logger
 import time
@@ -162,14 +162,15 @@ class Pipeline:
 
         return res
 
-    def process(self, documents: List[str]):
+    def process(self, documents: List[Dict[str]]):
         """
         Does the heavy lifting.
         
         TODO: pool sentences together to optimize batch size.
         """
         
-        docs = [Document(doc) for doc in documents]
+        ids = [doc['note_id'] for doc in documents]
+        docs = [Document(doc['note_text']) for doc in documents]
         
         for doc in docs:
             doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
@@ -185,8 +186,12 @@ class Pipeline:
         placeholder_doc = Document('')
         placeholder_doc.annotations = sentences
         
-        with torch.no_grad():
-            placeholder_doc.annotate([self.med, self.norm])
+        try:
+            with torch.no_grad():
+                placeholder_doc.annotate([self.med, self.norm])
+        except Exception as e:
+            logger.warning(f"One of the following documents had an error : {ids}")
+            logger.warning(e)
             
         for annotation in placeholder_doc.get_annotations('ENT/DRUG') + placeholder_doc.get_annotations('ENT/CLASS'):
             i = annotation.attributes['doc_id']
