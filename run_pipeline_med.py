@@ -40,7 +40,7 @@ def main_process(
     
     # Gère la parallèlisation automatiquement
     df_note['results'] = ray.get([
-        put_request.remote(note_text) 
+        put_request.remote(note_text, note_id) 
         for note_text, note_id in zip(df_note.note_text, df_note.note_id)
     ])
     
