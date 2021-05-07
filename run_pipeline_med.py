@@ -162,4 +162,4 @@ if __name__ == '__main__':
     elif write_mode == "append":
         sql(f"USE {output_schema}")
         df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
-        df_note_nlp_all.write.mode('overwrite').saveAsTable(output_table)
+        df_note_nlp_all.write.mode('append').saveAsTable(output_table)
