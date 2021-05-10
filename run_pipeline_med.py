@@ -55,7 +55,7 @@ def main_process(
     df_flat["nlp_date"] = pd.to_datetime(df_flat["nlp_date"])
     df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
 
-    df_flat = df_flat.drop(["results", "note_text"], axis=1)
+    df_flat = df_flat.drop(["results", "note_text", "note_datetime", "note_class_source_value"], axis=1)
     df_flat = df_flat.merge(df_id_none, on="note_id", how="outer")
 
     df_flat["offset_begin"] =  df_flat["offset_begin"].astype("Int64").fillna(0)
@@ -139,9 +139,7 @@ if __name__ == '__main__':
     note_schema = (
         T.StructType([
             T.StructField("person_id", T.StringType(), True),
-            T.StructField("note_datetime", T.TimestampType(), True),
             T.StructField("note_id", T.LongType(), True),
-            T.StructField("note_class_source_value", T.StringType(), True),
             T.StructField("note_nlp_id", T.DoubleType(), True),
             T.StructField("section_concept_id", T.StringType(), True),
             T.StructField("snippet", T.StringType(), True),
@@ -167,6 +165,5 @@ if __name__ == '__main__':
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif write_mode == "append":
         sql(f"USE {output_schema}")
-        df_old_note = df_old_note.drop("note_text")
         df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
         df_note_nlp_all.write.mode('append').saveAsTable(output_table)
