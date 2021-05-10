@@ -46,26 +46,9 @@ def main_process(
     
     df_note1 = df_note.explode("results")
 
-    # fill na with None 
-    note_nlp_item_not_found = {
-                'note_nlp_id': None,
-                'section_concept_id': None,
-                'snippet': None,
-                'offset_begin': None,
-                'offset_end': None,
-                'lexical_variant': None,
-                'note_nlp_concept_id': None,
-                'note_nlp_source_concept_id': 'ATC',
-                'nlp_system': "medext_v3",
-                'nlp_date': f"{datetime.datetime.today():%Y-%m-%d}",
-                'nlp_datetime': f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S}",
-                'term_exists': None,
-                'term_temporal': None,
-                'term_modifiers': None,
-                'validation_level_id': 'automated'
-            }
+    df_id_none = df_note1.loc[df_note1["results"].isna(), "note_id"]
 
-    df_note1["results"] = df_note1["results"].fillna(value=note_nlp_item_not_found)
+    df_note1 = df_note1.dropna(subset=["results"])
 
     df_flat = pd.concat([df_note1, df_note1.results.apply(pd.Series)], axis=1)
 
@@ -73,7 +56,8 @@ def main_process(
     df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
     df_flat["note_datetime"] = pd.to_datetime(df_flat["note_datetime"])
 
-    df_flat = df_flat.drop("results", axis=1)
+    df_flat = df_flat.drop(("results", "note_text"), axis=1)
+    df_flat = df_flat.join(df_id_none, on="note_id", how="outer")
 
     return df_flat
 
@@ -153,7 +137,6 @@ if __name__ == '__main__':
             T.StructField("person_id", T.StringType(), True),
             T.StructField("note_datetime", T.TimestampType(), True),
             T.StructField("note_id", T.LongType(), True),
-            T.StructField("note_text", T.StringType(), True),
             T.StructField("note_class_source_value", T.StringType(), True),
             T.StructField("note_nlp_id", T.DoubleType(), True),
             T.StructField("section_concept_id", T.StringType(), True),
@@ -180,5 +163,5 @@ if __name__ == '__main__':
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif write_mode == "append":
         sql(f"USE {output_schema}")
-        df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
+        df_note_nlp_all = df_old_note.union(df_note_spark_to_add).drop("note_text")
         df_note_nlp_all.write.mode('append').saveAsTable(output_table)
