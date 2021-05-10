@@ -45,8 +45,27 @@ def main_process(
     ])
     
     df_note1 = df_note.explode("results")
-    df_note1 = df_note1.dropna(subset=["results"])
 
+    # fill na with None 
+    note_nlp_item_not_found = {
+                'note_nlp_id': None,
+                'section_concept_id': None,
+                'snippet': None,
+                'offset_begin': None,
+                'offset_end': None,
+                'lexical_variant': None,
+                'note_nlp_concept_id': None,
+                'note_nlp_source_concept_id': 'ATC',
+                'nlp_system': "medext_v3",
+                'nlp_date': f"{datetime.datetime.today():%Y-%m-%d}",
+                'nlp_datetime': f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S}",
+                'term_exists': None,
+                'term_temporal': None,
+                'term_modifiers': None,
+                'validation_level_id': 'automated'
+            }
+
+    df_note1["results"] = df_note1["results"].fillna(value=note_nlp_item_not_found)
 
     df_flat = pd.concat([df_note1, df_note1.results.apply(pd.Series)], axis=1)
 
