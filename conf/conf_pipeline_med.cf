@@ -8,7 +8,7 @@ limit: 2000
 [OUTPUT]
 schema: coronaomop_unstable
 table: note_nlp_medoc_v2
-write_mode: append
+write_mode: full
 
 [PROCESS]
 process: cuda
