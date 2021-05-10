@@ -46,7 +46,7 @@ def main_process(
     
     df_note1 = df_note.explode("results")
 
-    df_id_none = df_note1.loc[df_note1["results"].isna(), "note_id"]
+    df_id_none = pd.DataFrame(df_note1.loc[df_note1["results"].isna(), "note_id"])
 
     df_note1 = df_note1.dropna(subset=["results"])
 
