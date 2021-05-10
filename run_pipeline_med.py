@@ -55,13 +55,13 @@ def main_process(
     df_flat["nlp_date"] = pd.to_datetime(df_flat["nlp_date"])
     df_flat["nlp_datetime"] = pd.to_datetime(df_flat["nlp_datetime"])
 
-    df_flat[["nlp_date", "nlp_datetime"]] = df_flat[["nlp_date", "nlp_datetime"]].fillna(method='ffill').fillna(method='bfill')
+    df_flat = df_flat.drop(["results", "note_text"], axis=1)
+    df_flat = df_flat.merge(df_id_none, on="note_id", how="outer")
 
     df_flat["offset_begin"] =  df_flat["offset_begin"].astype("Int64").fillna(0)
     df_flat["offset_end"] =  df_flat["offset_end"].astype("Int64").fillna(0)
 
-    df_flat = df_flat.drop(["results", "note_text"], axis=1)
-    df_flat = df_flat.merge(df_id_none, on="note_id", how="outer")
+     df_flat[["nlp_date", "nlp_datetime"]] = df_flat[["nlp_date", "nlp_datetime"]].fillna(method='ffill').fillna(method='bfill')
 
     return df_flat
 
