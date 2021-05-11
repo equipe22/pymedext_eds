@@ -165,6 +165,6 @@ if __name__ == '__main__':
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif write_mode == "append":
         sql(f"USE {output_schema}")
-        df_first_run = sql(f"select * from {output_schema}.note_nl_medoc")
+        df_first_run = sql(f"select * from {output_schema}.note_nlp_medoc")
         df_note_nlp_all = df_old_note.union(df_note_spark_to_add).union(df_first_run)
         df_note_nlp_all.write.mode('append').saveAsTable(output_table)
