@@ -219,8 +219,6 @@ class Pipeline:
 
 
 def run_pipeline(num_replicas=1, num_gpus=1, doc_batch_size=10, batch_wait_timeout=.5, sentence_batch_size=128):
-    
-    serve.stop()
 
     client = serve.start()
     
