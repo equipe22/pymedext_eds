@@ -120,6 +120,7 @@ if __name__ == '__main__':
             .dropna(subset="note_text")
             .join(df_old_note, on="note_id", how="left_anti")
             .select("person_id", "note_datetime", "note_id", "note_text", "note_class_source_value")
+            .orderBy(F.col("note_datetime").desc())
             .limit(limit)
             .toPandas()
         )
@@ -165,5 +166,6 @@ if __name__ == '__main__':
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif write_mode == "append":
         sql(f"USE {output_schema}")
-        df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
+        df_first_run = sql(f"select * from {output_schema}.note_nl_medoc")
+        df_note_nlp_all = df_old_note.union(df_note_spark_to_add).union(df_first_run)
         df_note_nlp_all.write.mode('append').saveAsTable(output_table)
