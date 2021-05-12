@@ -32,8 +32,13 @@ class NERAnnotator(Annotator):
                  models_param,
                  mini_batch_size = 1000,
                  emb_key = '0-transformer-word-data/embeddings/bert-base-medical-huge-cased/checkpoint-800000/',
-                 reduce_embedding = True,
+                 reduce_embedding = 'mean',
+                 temperature = 1e-8,
                  device="cpu"): 
+        """
+        Annotate text using collections of Flair Sequence Taggers and 
+        param reduce_embedding: 'mean', 'weighted_mean' or 'concat'
+        """
         
         super().__init__(key_input, key_output, ID)
         
@@ -41,6 +46,7 @@ class NERAnnotator(Annotator):
         self.store_embedding_labels = []
         self.emb_key = emb_key
         self.reduce_embedding = reduce_embedding
+        self.temperature = temperature
         self.mini_batch_size = mini_batch_size
         flair.device = torch.device(device)
         
@@ -146,10 +152,17 @@ class NERAnnotator(Annotator):
             
             if label.value in self.store_embedding_labels:
                 token_list = [t._embeddings[self.emb_key].reshape(1, -1) for t in entity.tokens]
-                if self.reduce_embedding:
+                if self.reduce_embedding == 'mean':
                     ent_embedding = torch.cat(token_list , axis = 0).mean(axis=0).numpy()
-                else:
+                elif self.reduce_embedding == 'weighted_mean':
+                    weights = torch.tensor([t.annotation_layers['pheno_pred'][0].score for t in entity])
+                    weights = ((weights + self.temperature) / (weights.sum() + len(weights)*self.temperature))
+                    ent_embedding = (torch.diag(weights) @ torch.cat(token_list , axis = 0)).sum(axis=0).numpy()
+                elif self.reduce_embedding == 'concat':
                     ent_embedding = torch.cat(token_list , axis = 0).numpy()
+                else: 
+                    raise NotImplementedError("Reduce embedding should be one of {'concat', 'mean', 'weighted_mean'}")
+
                 
                 ent_embedding = ent_embedding.reshape(-1, self.emb_size)
 

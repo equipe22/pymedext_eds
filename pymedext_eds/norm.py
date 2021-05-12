@@ -25,6 +25,7 @@ from .normalisation import clean_drug, clean_class, clean_freq, clean_dose
 import faiss
 import pandas as pd
 import numpy as np
+import h5py
 
 try:
     from quickumls import QuickUMLS
@@ -89,20 +90,44 @@ class NERNormalizer(Annotator):
                             
 class NormPheno(Annotator):
     
-    def __init__(self, key_input, key_output, ID, path_dict): 
+    def __init__(self, key_input, key_output, ID, path_dict, k_neighboors = 5, max_n_cui = 50): 
         super().__init__(key_input, key_output, ID)
         
-        self.path_dict=path_dict
+        self.k_neighboors = k_neighboors
+        self.path_dict = path_dict
+        
+        #load embeddings
+        hf = h5py.File(self.path_dict , 'r')
 
-        emb = pd.read_csv(path_dict, header=None)
-        self.dict_label = {k:(v[0], v[1]) for k,v in emb.iloc[:,:2].iterrows()}
-        matrix_embeddings = np.ascontiguousarray(emb.iloc[:,2:].values.astype('float32'))
+        self.dict_label = {}
+        embeddings = []
+        count = 0
+        for cui in hf.keys():
+            for label in hf[cui].keys():
+                for i, vec in enumerate(hf[cui][label].values()):
+                    if i > max_n_cui:
+                        break
+                    #todo clean
+                    vec = np.array(vec)
+                    if vec.ndim == 1:
+                        vec = vec.reshape(1, -1)
+                    if vec.shape[1] != 3072:
+                        continue
+                    ##
+                    self.dict_label[count] = (cui, label)
+
+                    
+                    embeddings.append(vec)
+                    count +=1
+
+        assert embeddings[0].shape[0] == 1
+        embeddings = np.ascontiguousarray(np.concatenate(embeddings, 0))
         
 
         #to faiss
-        self.index_embedding = faiss.index_factory(matrix_embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
-        faiss.normalize_L2(matrix_embeddings)
-        self.index_embedding.add(matrix_embeddings)
+        self.index_embedding = faiss.index_factory(embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
+        faiss.normalize_L2(embeddings)
+        self.index_embedding.add(embeddings)
 
         
     def annotate_function(self, _input):
@@ -118,11 +143,15 @@ class NormPheno(Annotator):
         matrix_list_annotation=np.concatenate(embedding_list_annotation)
         
         #find nearest
-        nearest_neighbors=self.find_closest_embeddings(matrix_list_annotation, k = 1)
+        nearest_neighbors = self.find_closest_embeddings(matrix_list_annotation, k = self.k_neighboors )
         
-        for ann_index, annotation in enumerate(ner_annotations):    
-            #get first match
-            emb_index, distance = nearest_neighbors[ann_index][0]
+        for ann_index, annotation in enumerate(ner_annotations):  
+            #get best match
+            weights = nearest_neighbors[ann_index][:,1]
+            indexs = nearest_neighbors[ann_index][:,0].astype('int')
+            scores = np.bincount(indexs, weights = weights) / (1e-8 + np.bincount(indexs))
+            emb_index = np.argmax(scores)
+            distance = np.max(scores)
             cui, cui_label = self.dict_label[emb_index]
 
             res.append(Annotation(
@@ -142,7 +171,6 @@ class NormPheno(Annotator):
     
     
     def find_closest_embeddings(self, annotation, k):
-        
         faiss.normalize_L2(annotation)
         D, I = self.index_embedding.search(annotation, k) # sanity check
         
@@ -150,14 +178,18 @@ class NormPheno(Annotator):
     
     
 class FeedDictionnary(Annotator):
-    def __init__(self, key_input, key_output, ID, path_dict,
-                quickumls_fp = 'data/umls2_UL/',
-                overlapping_criteria = "length", # "score" or "length"
-                threshold = 1,
-                similarity_name = "jaccard", # Choose between "dice", "jaccard", "cosine", or "overlap".
-                window = 5,
-                accepted_semtypes = {'T184', 'T047', 'T191', 'T049', 'T048', 'T046', 'T190', 'T019', 'T020', 'T037','T033'},
-                first_match_only = True
+    def __init__(self, 
+                 key_input, 
+                 key_output,
+                 ID, path_dict,
+                 quickumls_fp = 'data/umls2_UL/',
+                 overlapping_criteria = "length", # "score" or "length"
+                 threshold = 1,
+                 similarity_name = "jaccard", # Choose between "dice", "jaccard", "cosine", or "overlap".
+                 window = 5,
+                 accepted_semtypes = {'T184', 'T047', 'T191', 'T049', 'T048', 'T046', 'T190', 'T019', 'T020', 'T037','T033'},
+                 first_match_only = True,
+                 max_obs_per_cui = 50
                 ):
         super().__init__(key_input, key_output, ID)
 
@@ -173,32 +205,47 @@ class FeedDictionnary(Annotator):
                                  accepted_semtypes= accepted_semtypes)
         
         self.first_match_only = first_match_only
-        
+        self.max_obs_per_cui = max_obs_per_cui
     
     def annotate_function(self, _input):
+        hf = h5py.File(self.path_dict, 'a')
+
         ner_annotations = self.get_all_key_input(_input)
-        embeddings = []
-        labels = []
+
         for annotation in ner_annotations:
-            entity = self.match(annotation.value)[0]
-            
-            for match in entity:
+            matchs = self.match(annotation.value)
+            if not matchs:
+                continue
+                
+            for match in matchs[0]:
+                #force exact match
+                if (match['end'] - match['start']) != len(annotation.value):
+                    continue
+                    
+                #get embedding
                 emb = annotation.attributes['embedding']
-                if emb is not None:
-                    embeddings.append(emb)
-                    labels.append((match['term'], match['cui'], emb.shape[0]))
+                if emb is None:
+                    continue
+                    
+                #get group key
+                groupname = match['cui'] +"/" + match['term']
+                if groupname in hf:
+                    group = hf.get(groupname)
+                else:
+                    group = hf.create_group(groupname)
+                
+                #save if max number of emb not reach
+                if len(group) > self.max_obs_per_cui:
+                    continue
+
+                group.create_dataset(annotation.ID, data = emb)
+
+                #save only first cui match
                 if self.first_match_only:
                     break
+                    
+        hf.close()
 
-        if embeddings:
-            embeddings = np.concatenate(embeddings, 0)
-            labels = np.array(labels)
-
-            with open(self.path_dict + "_emb.npy", 'wb') as f:
-                np.save(f, embeddings)
-                         
-            with open(self.path_dict + "_label.npy", 'wb') as f:
-                np.save(f, labels)
         
     def match(self, text):
         return self.matcher.match(text)
