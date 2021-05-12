@@ -32,6 +32,8 @@ deploy-to-production:
     - mkdir -p $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/data
     - cp -r $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/../models/medicaments/* $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/data/
     - chmod u+x $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/bin/*.sh
+    - cp -r cleaning $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/
+    - chmod u+x $PRD_DELIVERY_PATH/$CI_PROJECT_NAME/cleaning/*.sh
     - chown -R 20017:20017 $PRD_DELIVERY_PATH/$CI_PROJECT_NAME
     - chown -R 20017:20017 $PRD_AIRFLOW_DELIVERY_PATH/$CI_PROJECT_NAME
   when: manual
