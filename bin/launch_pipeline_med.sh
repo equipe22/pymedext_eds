@@ -18,9 +18,9 @@ export https_proxy=http://proxym-inter.aphp.fr:8080
 
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
---master local[5] \
---driver-memory=10g \
---executor-memory=10g \
+--master local[10] \
+--driver-memory=20g \
+--executor-memory=20g \
 --conf spark.sql.session.timeZone=Europe/Paris \
 --conf spark.ui.enabled=true \
 --conf spark.driver.memoryOverhead=10g \
