@@ -113,7 +113,7 @@ if __name__ == '__main__':
             .toPandas()
         )
     elif write_mode == "append":
-        df_old_note = sql(f"select * from {output_schema}.{output_table}")
+        df_old_note = sql(f"select distinct note_id from {output_schema}.{output_table}")
         df_note = sql(f"select person_id, note_datetime, note_id, note_text, note_class_source_value from {input_schema}.{input_table}")
         df_note = (
             df_note
@@ -165,5 +165,4 @@ if __name__ == '__main__':
         df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
     elif write_mode == "append":
         sql(f"USE {output_schema}")
-        df_note_nlp_all = df_old_note.union(df_note_spark_to_add)
-        df_note_nlp_all.write.mode('append').saveAsTable(output_table)
+        df_note_spark_to_add.write.mode('append').saveAsTable(output_table)
