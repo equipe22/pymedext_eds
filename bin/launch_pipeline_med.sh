@@ -19,10 +19,10 @@ export https_proxy=http://proxym-inter.aphp.fr:8080
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
 --master local[10] \
---driver-memory=20g \
---executor-memory=20g \
+--driver-memory=40g \
+--executor-memory=40g \
 --conf spark.sql.session.timeZone=Europe/Paris \
 --conf spark.ui.enabled=true \
---conf spark.driver.memoryOverhead=10g \
+--conf spark.driver.memoryOverhead=20g \
 --conf "spark.driver.extraJavaOptions=-Dhttp.proxyHost=proxym-inter.aphp.fr -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxym-inter.aphp.fr -Dhttps.proxyPort=8080" \
 $MAIN_PATH $CONF_PATH
