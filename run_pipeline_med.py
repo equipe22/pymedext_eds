@@ -113,7 +113,7 @@ if __name__ == '__main__':
             .toPandas()
         )
     elif write_mode == "append":
-        df_note = spark.read.parquet("subset_df.parquet").toPandas()
+        df_note = spark.read.parquet("medicaments_tmp/subset_df.parquet").toPandas()
     
     run_pipeline(
         num_replicas=num_replicas, 
