@@ -113,16 +113,7 @@ if __name__ == '__main__':
             .toPandas()
         )
     elif write_mode == "append":
-        df_old_note = sql(f"select distinct note_id from {output_schema}.{output_table}")
-        df_note = sql(f"select person_id, note_datetime, note_id, note_text, note_class_source_value from {input_schema}.{input_table}")
-        df_note = (
-            df_note
-            .dropna(subset="note_text")
-            .join(df_old_note, on="note_id", how="left_anti")
-            .select("person_id", "note_datetime", "note_id", "note_text", "note_class_source_value")
-            .limit(limit)
-            .toPandas()
-        )
+        df_note = spark.read.parquet("subset_df.parquet").toPandas()
     
     run_pipeline(
         num_replicas=num_replicas, 
