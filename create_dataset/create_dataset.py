@@ -16,4 +16,4 @@ df_note = (
     .limit(10000)
 )
     
-df_note.write.parquet('medicaments_tmp/subset_df.parquet')
+df_note.write.mode("overwrite").parquet('medicaments_tmp/subset_df.parquet')
