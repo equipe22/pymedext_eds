@@ -5,6 +5,8 @@ ENV_PATH="/export/home/edsprod/med_env"
 
 source $ENV_PATH/bin/activate
 
+export SPARK_HOME=/usr/hdp/current/spark2.4.3-client
+
 $SPARK_HOME/bin/spark-submit \
 --name pipeline_med \
 --master yarn \
