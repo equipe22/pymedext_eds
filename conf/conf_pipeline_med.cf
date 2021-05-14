@@ -3,7 +3,7 @@
 [INPUT]
 schema: coronaomop_unstable
 table: note
-limit: 500000
+limit: 5000
 
 [OUTPUT]
 schema: coronaomop_unstable
@@ -16,5 +16,6 @@ process: cuda
 [RAY_PARAMETERS]
 num_replica: 8
 num_gpus: 1
-doc_batch_size: 10
+doc_batch_size: 20
+batch_wait_timeout: 2
 sentence_batch_size: 128

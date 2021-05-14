@@ -92,6 +92,7 @@ if __name__ == '__main__':
     num_gpus = int(config_object["RAY_PARAMETERS"]["num_gpus"])
     doc_batch_size = int(config_object["RAY_PARAMETERS"]["doc_batch_size"])
     sentence_batch_size = int(config_object["RAY_PARAMETERS"]["sentence_batch_size"])
+    batch_wait_timeout = int(config_object["RAY_PARAMETERS"]["batch_wait_timeout"])
 
     #### Read data 
     spark = SparkSession.builder \
@@ -119,7 +120,7 @@ if __name__ == '__main__':
         num_replicas=num_replicas, 
         num_gpus=num_gpus, 
         doc_batch_size=doc_batch_size, 
-        batch_wait_timeout=.5, 
+        batch_wait_timeout=batch_wait_timeout, 
         sentence_batch_size=sentence_batch_size,
     )
     
