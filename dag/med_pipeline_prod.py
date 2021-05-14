@@ -15,14 +15,14 @@ env_path = "/export/home/edsprod/app/bigdata/env_pkg/med_env.tar.gz"
 default_args = {
     'owner': 'airflow',
     'catchup': False,
-    'start_date': days_ago(1),
+    'start_date': days_ago(0),
     'retries': 0,
 }
 
 
 dag = DAG('Detection_Medicaments', description='detection medicaments',
           catchup=False,
-          schedule_interval='0 14,23 * * *',
+          schedule_interval='@once',
           default_args=default_args,
           )
 
