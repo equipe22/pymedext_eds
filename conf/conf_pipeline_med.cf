@@ -3,7 +3,7 @@
 [INPUT]
 schema: coronaomop_unstable
 table: note
-limit: 100000
+limit: 400000
 
 [OUTPUT]
 schema: coronaomop_unstable
