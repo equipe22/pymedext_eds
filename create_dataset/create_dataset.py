@@ -13,7 +13,7 @@ df_note = (
     .dropna(subset="note_text")
     .join(df_old_note, on="note_id", how="left_anti")
     .select("person_id", "note_datetime", "note_id", "note_text", "note_class_source_value")
-    .limit(500000)
+    .limit(400000)
 )
     
 df_note.write.mode("overwrite").parquet('medicaments_tmp/subset_df.parquet')
