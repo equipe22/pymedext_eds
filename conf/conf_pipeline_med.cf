@@ -17,5 +17,5 @@ process: cuda
 num_replica: 8
 num_gpus: 1
 doc_batch_size: 50
-batch_wait_timeout: 5
+batch_wait_timeout: 1
 sentence_batch_size: 128
