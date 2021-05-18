@@ -27,9 +27,16 @@ dag = DAG('Detection_Medicaments', description='detection medicaments',
           )
 
 with dag:
-    match_sivic = BashOperator(
-        task_id='detect_med',
+    get_temp_data = BashOperator(
+        task_id='get_temp_data',
+        bash_command="ssh gpu 'cd /export/home/edsprod/app/bigdata/create_dataset/ && /export/home/edsprod/app/bigdata/pymedext-eds/bin/launch_create_dataset.sh' ",
+        dag=dag,
+    )
+
+    apply_med_algo = BashOperator(
+        task_id='apply_med_algo',
         bash_command="ssh gpu 'cd /export/home/edsprod/app/bigdata/pymedext-eds && /export/home/edsprod/app/bigdata/pymedext-eds/bin/launch_pipeline_med.sh' ",
         dag=dag,
     )
 
+get_temp_data >> apply_med_algo
