@@ -22,7 +22,7 @@ default_args = {
 
 dag = DAG('Detection_Medicaments', description='detection medicaments',
           catchup=False,
-          schedule_interval='0 13,22 * * *',
+          schedule_interval='0 12,21 * * *',
           default_args=default_args,
           )
 
