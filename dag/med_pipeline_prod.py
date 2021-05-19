@@ -29,7 +29,7 @@ dag = DAG('Detection_Medicaments', description='detection medicaments',
 with dag:
     get_temp_data = BashOperator(
         task_id='get_temp_data',
-        bash_command="ssh gpu 'cd /export/home/edsprod/app/bigdata/pymedext-eds/create_dataset/ && /export/home/edsprod/app/bigdata/pymedext-eds/bin/launch_create_dataset.sh' ",
+        bash_command="ssh gpu 'cd /export/home/edsprod/app/bigdata/pymedext-eds/create_dataset/ && /export/home/edsprod/app/bigdata/pymedext-eds/create_dataset/launch_create_dataset.sh' ",
         dag=dag,
     )
 
