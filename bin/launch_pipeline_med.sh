@@ -1,7 +1,6 @@
 #!/bin/bash
 
 MAIN_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/run_pipeline_med.py"
-PATH_CREATE_DATASET="/export/home/edsprod/app/bigdata/pymedext-eds/create_dataset/create_dataset.py"
 CONF_PATH="/export/home/edsprod/app/bigdata/pymedext-eds/conf_pipeline_med.cf"
 ENV_PATH="/export/home/edsprod/med_env"
 
