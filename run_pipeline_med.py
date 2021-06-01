@@ -116,45 +116,46 @@ if __name__ == '__main__':
     elif write_mode == "append":
         df_note = spark.read.parquet("medicaments_tmp/subset_df.parquet").limit(limit).toPandas()
     
-    run_pipeline(
-        num_replicas=num_replicas, 
-        num_gpus=num_gpus, 
-        doc_batch_size=doc_batch_size, 
-        batch_wait_timeout=batch_wait_timeout, 
-        sentence_batch_size=sentence_batch_size,
-    )
-    
-    ### launch client
-    result = main_process(df_note, limit=limit)
-    
-    ### write in database
-    note_schema = (
-        T.StructType([
-            T.StructField("person_id", T.StringType(), True),
-            T.StructField("note_id", T.LongType(), True),
-            T.StructField("note_nlp_id", T.DoubleType(), True),
-            T.StructField("section_concept_id", T.StringType(), True),
-            T.StructField("snippet", T.StringType(), True),
-            T.StructField("offset_begin", T.IntegerType(), True),
-            T.StructField("offset_end", T.IntegerType(), True),
-            T.StructField("lexical_variant", T.StringType(), True),
-            T.StructField("note_nlp_concept_id", T.StringType(), True),
-            T.StructField("note_nlp_source_concept_id", T.StringType(), True),
-            T.StructField("nlp_system", T.StringType(), True),
-            T.StructField("nlp_date", T.TimestampType(), True),
-            T.StructField("nlp_datetime", T.TimestampType(), True),
-            T.StructField("term_exists", T.StringType(), True),
-            T.StructField("term_temporal", T.StringType(), True),
-            T.StructField("term_modifiers", T.StringType(), True),
-            T.StructField("validation_level_id", T.StringType(), True)
-        ])
-    )
-    
-    df_note_spark_to_add = spark.createDataFrame(result,schema=note_schema)
-    
-    if write_mode == "full":
-        sql(f"USE {output_schema}")
-        df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
-    elif write_mode == "append":
-        sql(f"USE {output_schema}")
-        df_note_spark_to_add.write.mode('append').saveAsTable(output_table)
+    if df_note.shape > 0:
+        run_pipeline(
+            num_replicas=num_replicas, 
+            num_gpus=num_gpus, 
+            doc_batch_size=doc_batch_size, 
+            batch_wait_timeout=batch_wait_timeout, 
+            sentence_batch_size=sentence_batch_size,
+        )
+        
+        ### launch client
+        result = main_process(df_note, limit=limit)
+        
+        ### write in database
+        note_schema = (
+            T.StructType([
+                T.StructField("person_id", T.StringType(), True),
+                T.StructField("note_id", T.LongType(), True),
+                T.StructField("note_nlp_id", T.DoubleType(), True),
+                T.StructField("section_concept_id", T.StringType(), True),
+                T.StructField("snippet", T.StringType(), True),
+                T.StructField("offset_begin", T.IntegerType(), True),
+                T.StructField("offset_end", T.IntegerType(), True),
+                T.StructField("lexical_variant", T.StringType(), True),
+                T.StructField("note_nlp_concept_id", T.StringType(), True),
+                T.StructField("note_nlp_source_concept_id", T.StringType(), True),
+                T.StructField("nlp_system", T.StringType(), True),
+                T.StructField("nlp_date", T.TimestampType(), True),
+                T.StructField("nlp_datetime", T.TimestampType(), True),
+                T.StructField("term_exists", T.StringType(), True),
+                T.StructField("term_temporal", T.StringType(), True),
+                T.StructField("term_modifiers", T.StringType(), True),
+                T.StructField("validation_level_id", T.StringType(), True)
+            ])
+        )
+        
+        df_note_spark_to_add = spark.createDataFrame(result,schema=note_schema)
+        
+        if write_mode == "full":
+            sql(f"USE {output_schema}")
+            df_note_spark_to_add.write.mode('overwrite').saveAsTable(output_table)
+        elif write_mode == "append":
+            sql(f"USE {output_schema}")
+            df_note_spark_to_add.write.mode('append').saveAsTable(output_table)
