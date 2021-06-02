@@ -116,7 +116,7 @@ if __name__ == '__main__':
     elif write_mode == "append":
         df_note = spark.read.parquet("medicaments_tmp/subset_df.parquet").limit(limit).toPandas()
     
-    if df_note.shape > 0:
+    if df_note.shape[0] > 0:
         run_pipeline(
             num_replicas=num_replicas, 
             num_gpus=num_gpus, 
