@@ -32,9 +32,13 @@ try:
     from quickumls.constants import ACCEPTED_SEMTYPES
 except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
-
-
     
+import edlib
+import heapq
+from operator import itemgetter
+import pickle
+
+from dtaidistance import dtw_ndim
 
 class NERNormalizer(Annotator):
     def __init__(self, key_input, key_output, ID, romedi_path, class_norm = CLASS_NORM): 
@@ -128,6 +132,7 @@ class NormPheno(Annotator):
         self.index_embedding = faiss.index_factory(embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
         faiss.normalize_L2(embeddings)
         self.index_embedding.add(embeddings)
+        
 
         
     def annotate_function(self, _input):
@@ -155,7 +160,7 @@ class NormPheno(Annotator):
             cui, cui_label = self.dict_label[emb_index]
 
             res.append(Annotation(
-                type = "normalized_mention",
+                type = self.key_output,
                 value = cui_label ,
                 span = annotation.span,
                 source = self.ID,
@@ -167,7 +172,7 @@ class NormPheno(Annotator):
 
     
     def get_embedding(self, annotation):
-        return annotation.attributes.pop('embedding')
+        return annotation.attributes['embedding']
     
     
     def find_closest_embeddings(self, annotation, k):
@@ -176,6 +181,493 @@ class NormPheno(Annotator):
         
         return np.dstack((I,D))
     
+    
+class NormPhenoLev(Annotator):
+    
+    def __init__(self, 
+                 key_input,
+                 key_output,
+                 ID, path_dict = None,
+                 make_code = False,
+                 best_code_size = 4,
+                 pca_dim = 128,
+                 max_n_cui = 50,
+                 max_editdistance = 0.5,
+                 code_base = 8,
+                 emb_dim = 3072
+                 
+                ): 
+        super().__init__(key_input, key_output, ID)
+        
+        self.pca_dim = pca_dim
+        self.path_dict = path_dict
+        self.max_editdistance = max_editdistance
+        self.emb_dim = emb_dim
+        
+        if make_code:
+            #load embeddings
+            hf = h5py.File(self.path_dict , 'r')
+
+            self.dict_label = {}
+            embeddings = []
+            count = 0
+            for cui in tqdm(hf.keys()):
+                for label in hf[cui].keys():
+                    for ent_i, vec in enumerate(hf[cui][label].values()):
+                        vec = np.array(vec)
+                        if vec.shape[1] != emb_dim:
+                            continue
+                        self.dict_label[count] = {"cui":cui, "label":label, "n_tok":vec.shape[0]}
+
+                        #iterate tokens
+                        for tok_i in range(len(vec)):
+                            embeddings.append(vec[tok_i,:])
+                            count +=1
+
+            assert len(embeddings) == sum([t["n_tok"] for t in self.dict_label.values()])
+
+            embeddings = np.ascontiguousarray(np.array(embeddings)).astype('float32')
+            
+            #fit PCA
+            print("Fit PCA")
+            self.pca = faiss.PCAMatrix(self.emb_dim, self.pca_dim)
+            self.pca.train(embeddings)
+            assert self.pca.is_trained
+            embeddings = self.pca.apply_py(embeddings)
+            #save PCA
+            faiss.write_VectorTransform(self.pca, self.path_dict.split('.')[0]+".pca")
+
+
+            print("Fit PQ")
+            cs_search = {}
+            for code_size in [1, 2, 4, 8, 16, 32]:
+                if code_size // self.pca_dim > 0.5:
+                    continue
+                pq = faiss.ProductQuantizer(self.pca_dim, code_size, code_base)
+                pq.train(embeddings)
+                # encode 
+                codes = pq.compute_codes(embeddings)
+                # decode
+                embeddings2 = pq.decode(codes)
+                # compute reconstruction error
+                avg_relative_error = ((embeddings - embeddings2)**2).sum() / (embeddings ** 2).sum()
+
+                cs_search[code_size] = avg_relative_error
+                print("code size:", code_size, "average error:", avg_relative_error)
+
+
+            print("Choosing code size:", best_code_size)
+            pq = faiss.ProductQuantizer(self.pca_dim, best_code_size, code_base)
+            pq.train(embeddings)
+            # encode 
+            codes = pq.compute_codes(embeddings)
+
+            for ent_k in self.dict_label.keys():
+                self.dict_label[ent_k]['seq'] = codes[ent_k:ent_k+self.dict_label[ent_k]['n_tok']].reshape(-1).tolist()
+
+            #self.dict_label = {i:v for i,v in enumerate(self.dict_label.values())}
+            #drop exact same sequence
+            new_dict = {}
+            for k,v in self.dict_label.items():
+                cui = v['cui']
+                if cui in new_dict:
+                    if v['seq'] in [t['seq'] for t in new_dict[cui]]:
+                        pass
+                    else:
+                        new_dict[cui].append({'label':v['label'], 'seq':v['seq'], 'cui':v['cui']})
+
+                else:
+                    new_dict[cui] = [{'label':v['label'], 'seq':v['seq'], 'cui':v['cui']}]
+
+            new_dict = [t for k, sub in new_dict.items() for t in sub]
+            new_dict = {i:v for i,v in enumerate(new_dict)}
+            self.dict_label = new_dict
+            del new_dict
+            
+            self.pq = pq
+            
+            faiss.write_ProductQuantizer(pq, self.path_dict.split('.')[0]+".pq")
+
+
+            with open(self.path_dict.split('.')[0]+".pickle", 'wb') as handle:
+                pickle.dump(self.dict_label, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        else:
+
+            with open(self.path_dict.split('.')[0]+".pickle", 'rb') as handle:
+                self.dict_label = pickle.load(handle)
+
+            self.pca = faiss.read_VectorTransform(self.path_dict.split('.')[0]+".pca")
+            self.pq = faiss.read_ProductQuantizer(self.path_dict.split('.')[0]+".pq")
+
+
+
+
+        
+    def annotate_function(self, _input):
+        
+        #get annotations
+        ner_annotations = self.get_all_key_input(_input)
+        res = []
+        
+
+        for ann_index, annotation in enumerate(ner_annotations):
+            #get embeddings
+            emb = self.get_embedding(annotation)
+
+            #get codes
+            emb = self.get_codes(emb).reshape(-1).tolist()
+            
+            #get closest match
+            best_match = self.get_closest_match(emb)
+            if best_match["score_ed"] >= 1:
+                continue
+                
+            
+            res.append(Annotation(
+                type = self.key_output,
+                value = best_match["label"],
+                span = annotation.span,
+                source = self.ID,
+                source_ID = annotation.source_ID,
+                attributes = {'score_ed':best_match["score_ed"], "mention" : annotation.value, 'cui':best_match["cui"], 'label': best_match["label"], **annotation.attributes})
+                      )
+        
+        return res        
+
+    
+    def get_embedding(self, annotation):
+        return annotation.attributes['embedding']
+    
+    
+    def get_codes(self, emb):
+        emb = self.pca.apply_py(emb)
+        codes = self.pq.compute_codes(emb)
+        return codes
+    
+    def get_closest_match(self, query):
+        distances = []
+        best_md = 1000
+        #iter possible match
+        for target in self.dict_label.values():
+            #compute unorm max distance
+            md = max(map(len, [query, target["seq"]]))
+            max_editdistance = int(md * self.max_editdistance)
+            #get min btw max distance and min res
+            max_editdistance = min(best_md, max_editdistance)
+            res = edlib.align(query = query, target = target["seq"], task ='distance', k = max_editdistance)['editDistance']
+            if res == -1:
+                res = md
+            best_md = min(res, best_md)
+            distances.append(res / md)
+            
+        i_val = heapq.nsmallest(1, enumerate(distances), key=itemgetter(1))
+        best_match = [self.dict_label[t[0]] for t in i_val][0]
+        best_match.update({"score_ed": i_val[0][1]})
+        
+        return best_match if i_val[0][1] <= self.max_editdistance else {"cui":None, "score_ed":1, "label":None}
+            
+class NormPhenoDTW(Annotator):
+    
+    def __init__(self, 
+                 key_input,
+                 key_output,
+                 ID, path_dict = None,
+                 make_code = False,
+                 pca_dim = 128,
+                 max_editdistance = 50,
+                 emb_dim = 3072,
+                 dtw_window = 4
+                 
+                ): 
+        super().__init__(key_input, key_output, ID)
+        
+        self.pca_dim = pca_dim
+        self.path_dict = path_dict
+        self.max_editdistance = max_editdistance
+        self.emb_dim = emb_dim
+        self.dtw_window = dtw_window
+        if make_code:
+            #load embeddings
+            hf = h5py.File(self.path_dict , 'r')
+
+            self.dict_label = {}
+            embeddings = []
+            count = 0
+            for cui in tqdm(hf.keys()):
+                for label in hf[cui].keys():
+                    for ent_i, vec in enumerate(hf[cui][label].values()):
+                        vec = np.array(vec)
+                        if vec.shape[1] != emb_dim:
+                            continue
+                        self.dict_label[count] = {"cui":cui, "label":label, "n_tok":vec.shape[0]}
+
+                        #iterate tokens
+                        for tok_i in range(len(vec)):
+                            embeddings.append(vec[tok_i,:])
+                            count +=1
+
+            assert len(embeddings) == sum([t["n_tok"] for t in self.dict_label.values()])
+
+            embeddings = np.ascontiguousarray(np.array(embeddings)).astype('float32')
+            
+            #fit PCA
+            print("Fit PCA")
+            self.pca = faiss.PCAMatrix(self.emb_dim, self.pca_dim)
+            self.pca.train(embeddings)
+            assert self.pca.is_trained
+            embeddings = self.pca.apply_py(embeddings)
+            #save PCA
+            faiss.write_VectorTransform(self.pca, self.path_dict.split('.')[0]+"_dtw.pca")
+
+
+            for ent_k in self.dict_label.keys():
+                self.dict_label[ent_k]['seq'] = embeddings[ent_k:ent_k+self.dict_label[ent_k]['n_tok']]
+
+            self.dict_label = {i:v for i,v in enumerate(self.dict_label.values())}
+ 
+
+            with open(self.path_dict.split('.')[0]+"_dtw.pickle", 'wb') as handle:
+                pickle.dump(self.dict_label, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        else:
+
+            with open(self.path_dict.split('.')[0]+"_dtw.pickle", 'rb') as handle:
+                self.dict_label = pickle.load(handle)
+
+            self.pca = faiss.read_VectorTransform(self.path_dict.split('.')[0]+"_dtw.pca")
+
+
+
+
+        
+    def annotate_function(self, _input):
+        
+        #get annotations
+        ner_annotations = self.get_all_key_input(_input)
+        res = []
+        
+
+        for ann_index, annotation in enumerate(ner_annotations):
+            #get embeddings
+            emb = self.get_embedding(annotation)
+
+            #get codes
+            emb = self.get_codes(emb)
+            
+            #get closest match
+            best_match = self.get_closest_match(emb)
+                
+            
+            res.append(Annotation(
+                type = self.key_output,
+                value = best_match["label"],
+                span = annotation.span,
+                source = self.ID,
+                source_ID = annotation.source_ID,
+                attributes = {'score_ed':best_match["score_ed"], "mention" : annotation.value, 'cui':best_match["cui"], 'label': best_match["label"], **annotation.attributes})
+                      )
+        
+        return res        
+
+    
+    def get_embedding(self, annotation):
+        return annotation.attributes['embedding']
+    
+    
+    def get_codes(self, emb):
+        emb = self.pca.apply_py(emb)
+        return emb
+    
+    def get_closest_match(self, query):
+        distances = []
+        best_md = 1e18
+        #iter possible match
+        for target in self.dict_label.values():
+
+            max_editdistance = min(best_md, self.max_editdistance)
+            res = dtw_ndim.distance(query.astype('double'), target["seq"].astype('double'), window = self.dtw_window, max_dist=max_editdistance, use_c= True)
+            best_md = min(res, best_md)
+            distances.append(res)
+            
+        i_val = heapq.nsmallest(1, enumerate(distances), key=itemgetter(1))
+        best_match = [self.dict_label[t[0]] for t in i_val][0]
+        best_match.update({"score_ed": i_val[0][1]})
+        return best_match
+
+        #return best_match if i_val[0][1] <= self.max_editdistance else {"cui":None, "score_ed":1000, "label":None}
+    
+class NormPhenoCat(Annotator):
+    
+    def __init__(self, 
+                 key_input,
+                 key_output,
+                 ID, 
+                 path_dict = None,
+                 make_code = False,
+                 pca_dim = 50,
+                 k_neighboors = 1,
+                 max_distance = 0.5,
+                 emb_dim = 3072
+                 
+                ): 
+        super().__init__(key_input, key_output, ID)
+        
+        self.pca_dim = pca_dim
+        self.path_dict = path_dict
+        self.max_editdistance = max_editdistance
+        self.emb_dim = emb_dim
+        
+        self.init_classifier(make_code)
+        
+    def init_classifier(self, make_code):
+        if make_code:
+            #load embeddings
+            hf = h5py.File(self.path_dict , 'r')
+
+            self.dict_label = {}
+            embeddings = []
+            count = 0
+            for cui in hf.keys():
+                for label in hf[cui].keys():
+                    for ent_i, vec in enumerate(hf[cui][label].values()):
+                        vec = np.array(vec)
+                        if vec.shape[1] != emb_dim:
+                            continue
+                        self.dict_label[count] = {"cui":cui, "label":label, "n_tok":vec.shape[0]}
+
+                        #iterate tokens
+                        for tok_i in range(len(vec)):
+                            embeddings.append(vec[tok_i,:])
+                            count +=1
+
+            assert len(embeddings) == sum([t["n_tok"] for t in self.dict_label.values()])
+
+            embeddings = np.ascontiguousarray(np.array(embeddings)).astype('float32')
+
+
+            #reduce dimension PCA
+            
+            
+            #save PCA
+            self.pq = pq
+            faiss.write_ProductQuantizer(pq, self.path_dict.split('.')[0]+".pq")
+
+
+            
+            #concat tokens
+
+            for ent_k in self.dict_label.keys():
+                self.dict_label[ent_k]['seq'] = codes[ent_k:ent_k+self.dict_label[ent_k]['n_tok']].reshape(-1).tolist()
+
+            #drop exact close vec
+            new_dict = {}
+            for k,v in self.dict_label.items():
+                cui = v['cui']
+                if cui in new_dict:
+                    if v['seq'] in [t['seq'] for t in new_dict[cui]]:
+                        pass
+                    else:
+                        new_dict[cui].append({'label':v['label'], 'seq':v['seq'], 'cui':v['cui']})
+
+                else:
+                    new_dict[cui] = [{'label':v['label'], 'seq':v['seq'], 'cui':v['cui']}]
+
+            new_dict = [t for k, sub in new_dict.items() for t in sub]
+            new_dict = {i:v for i,v in enumerate(new_dict)}
+            self.dict_label = new_dict
+            del new_dict
+            
+
+            #save
+            with open(self.path_dict.split('.')[0]+".pickle", 'wb') as handle:
+                pickle.dump(self.dict_label, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        else:
+            #load dic
+            with open(self.path_dict.split('.')[0]+".pickle", 'rb') as handle:
+                self.dict_label = pickle.load(handle)
+                
+                
+            #load PCA
+
+            self.pq = faiss.read_ProductQuantizer(self.path_dict.split('.')[0]+".pq")
+            
+            
+        #make index
+
+        #to faiss
+        self.index_embedding = faiss.index_factory(embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
+        faiss.normalize_L2(embeddings)
+        self.index_embedding.add(embeddings)
+
+
+
+
+
+        
+    def annotate_function(self, _input):
+        
+        #get annotations
+        ner_annotations = self.get_all_key_input(_input)
+        res = []
+        
+
+        for ann_index, annotation in enumerate(ner_annotations):
+            #get embeddings
+            emb = self.get_embedding(annotation)
+
+            #get codes
+            emb = self.get_codes(emb).reshape(-1).tolist()
+            
+            #get closest match
+            best_match = self.get_closest_match(emb)
+            if best_match["score_ed"] >= 1:
+                continue
+                
+            
+            res.append(Annotation(
+                type = self.key_output,
+                value = best_match["label"],
+                span = annotation.span,
+                source = self.ID,
+                source_ID = annotation.source_ID,
+                attributes = {'score_ed':best_match["score_ed"], "mention" : annotation.value, 'cui':best_match["cui"], 'label': best_match["label"], **annotation.attributes})
+                      )
+        
+        return res        
+
+    
+    def get_embedding(self, annotation):
+        return annotation.attributes['embedding']
+    
+    
+    def get_codes(self, emb):
+        codes = self.pq.compute_codes(emb)
+        return codes
+    
+    def get_closest_match(self, query):
+        distances = []
+        best_md = 1000
+        #iter possible match
+        for target in self.dict_label.values():
+            #compute unorm max distance
+            md = max(map(len, [query, target["seq"]]))
+            max_editdistance = int(md * self.max_editdistance)
+            #get min btw max distance and min res
+            max_editdistance = min(best_md, max_editdistance)
+            res = edlib.align(query = query, target = target["seq"], task ='distance', k = max_editdistance)['editDistance']
+            if res == -1:
+                res = md
+            best_md = min(res, best_md)
+            distances.append(res / md)
+            
+        i_val = heapq.nsmallest(1, enumerate(distances), key=itemgetter(1))
+        best_match = [self.dict_label[t[0]] for t in i_val][0]
+        best_match.update({"score_ed": i_val[0][1]})
+        
+        return best_match if i_val[0][1] <= self.max_editdistance else {"cui":None, "score_ed":1, "label":None}
+            
     
 class FeedDictionnary(Annotator):
     def __init__(self, 
