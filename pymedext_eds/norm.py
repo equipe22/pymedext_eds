@@ -320,8 +320,8 @@ class NormPhenoLev(Annotator):
             
             #get closest match
             best_match = self.get_closest_match(emb)
-            if best_match["score_ed"] >= 1:
-                continue
+#            if best_match["score_ed"] >= 1:
+#                continue
                 
             
             res.append(Annotation(
@@ -493,6 +493,7 @@ class NormPhenoDTW(Annotator):
         i_val = heapq.nsmallest(1, enumerate(distances), key=itemgetter(1))
         best_match = [self.dict_label[t[0]] for t in i_val][0]
         best_match.update({"score_ed": i_val[0][1]})
+        
         return best_match
 
         #return best_match if i_val[0][1] <= self.max_editdistance else {"cui":None, "score_ed":1000, "label":None}
@@ -515,7 +516,7 @@ class NormPhenoCat(Annotator):
         
         self.pca_dim = pca_dim
         self.path_dict = path_dict
-        self.max_editdistance = max_editdistance
+        self.max_distance = max_distance
         self.emb_dim = emb_dim
         
         self.init_classifier(make_code)
@@ -528,11 +529,11 @@ class NormPhenoCat(Annotator):
             self.dict_label = {}
             embeddings = []
             count = 0
-            for cui in hf.keys():
+            for cui in tqdm(hf.keys()):
                 for label in hf[cui].keys():
                     for ent_i, vec in enumerate(hf[cui][label].values()):
                         vec = np.array(vec)
-                        if vec.shape[1] != emb_dim:
+                        if vec.shape[1] != self.emb_dim:
                             continue
                         self.dict_label[count] = {"cui":cui, "label":label, "n_tok":vec.shape[0]}
 
@@ -540,61 +541,45 @@ class NormPhenoCat(Annotator):
                         for tok_i in range(len(vec)):
                             embeddings.append(vec[tok_i,:])
                             count +=1
+                            
+
 
             assert len(embeddings) == sum([t["n_tok"] for t in self.dict_label.values()])
 
             embeddings = np.ascontiguousarray(np.array(embeddings)).astype('float32')
 
-
-            #reduce dimension PCA
-            
-            
+            #fit PCA
+            print("Fit PCA")
+            self.pca = faiss.PCAMatrix(self.emb_dim, self.pca_dim)
+            self.pca.train(embeddings)
+            assert self.pca.is_trained
+            embeddings = self.pca.apply_py(embeddings)
             #save PCA
-            self.pq = pq
-            faiss.write_ProductQuantizer(pq, self.path_dict.split('.')[0]+".pq")
+            faiss.write_VectorTransform(self.pca, self.path_dict.split('.')[0]+"_cat.pca")
 
-
-            
-            #concat tokens
 
             for ent_k in self.dict_label.keys():
-                self.dict_label[ent_k]['seq'] = codes[ent_k:ent_k+self.dict_label[ent_k]['n_tok']].reshape(-1).tolist()
+                start_tok = ent_k
+                end_tok = ent_k+self.dict_label[ent_k]['n_tok']
+                tmp_emb = np.concatenate([embeddings[start_tok], np.mean(embeddings[start_tok:end_tok], 0)], 0)
+                self.dict_label[ent_k]['seq'] = tmp_emb
 
-            #drop exact close vec
-            new_dict = {}
-            for k,v in self.dict_label.items():
-                cui = v['cui']
-                if cui in new_dict:
-                    if v['seq'] in [t['seq'] for t in new_dict[cui]]:
-                        pass
-                    else:
-                        new_dict[cui].append({'label':v['label'], 'seq':v['seq'], 'cui':v['cui']})
+            self.drop_duplicated_emb()
 
-                else:
-                    new_dict[cui] = [{'label':v['label'], 'seq':v['seq'], 'cui':v['cui']}]
-
-            new_dict = [t for k, sub in new_dict.items() for t in sub]
-            new_dict = {i:v for i,v in enumerate(new_dict)}
-            self.dict_label = new_dict
-            del new_dict
-            
-
-            #save
-            with open(self.path_dict.split('.')[0]+".pickle", 'wb') as handle:
+            with open(self.path_dict.split('.')[0]+"_cat.pickle", 'wb') as handle:
                 pickle.dump(self.dict_label, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         else:
-            #load dic
-            with open(self.path_dict.split('.')[0]+".pickle", 'rb') as handle:
-                self.dict_label = pickle.load(handle)
-                
-                
-            #load PCA
 
-            self.pq = faiss.read_ProductQuantizer(self.path_dict.split('.')[0]+".pq")
-            
+            with open(self.path_dict.split('.')[0]+"_cat.pickle", 'rb') as handle:
+                self.dict_label = pickle.load(handle)
+
+            self.pca = faiss.read_VectorTransform(self.path_dict.split('.')[0]+"_cat.pca")
+
             
         #make index
+        embeddings = np.ascontiguousarray(np.concatenate([t['seq'].reshape(1, -1) for t  in self.dict_label.values()], 0))
+
 
         #to faiss
         self.index_embedding = faiss.index_factory(embeddings.shape[1], "Flat", faiss.METRIC_INNER_PRODUCT)
@@ -603,7 +588,27 @@ class NormPhenoCat(Annotator):
 
 
 
+    def drop_duplicated_emb(self):
+        print("Get rid of duplicates")
+        print("Old size:{}".format(len(self.dict_label)))
 
+        #drop exact same sequence
+        new_dict = {}
+        for k,v in self.dict_label.items():
+            cui = v['cui']
+            if cui in new_dict:
+                if any([np.allclose(v['seq'], t['seq']) for t in new_dict[cui]]):
+                    pass
+                else:
+                    new_dict[cui].append({'label':v['label'], 'seq':v['seq'], 'cui':v['cui']})
+
+            else:
+                new_dict[cui] = [{'label':v['label'], 'seq':v['seq'], 'cui':v['cui']}]
+
+        new_dict = [t for k, sub in new_dict.items() for t in sub]
+        new_dict = {i:v for i,v in enumerate(new_dict)}
+        self.dict_label = new_dict
+        print("New size:{}".format(len(self.dict_label)))
 
         
     def annotate_function(self, _input):
@@ -618,13 +623,12 @@ class NormPhenoCat(Annotator):
             emb = self.get_embedding(annotation)
 
             #get codes
-            emb = self.get_codes(emb).reshape(-1).tolist()
+            emb = self.get_codes(emb)
             
             #get closest match
             best_match = self.get_closest_match(emb)
-            if best_match["score_ed"] >= 1:
-                continue
-                
+            #get best match
+
             
             res.append(Annotation(
                 type = self.key_output,
@@ -635,7 +639,9 @@ class NormPhenoCat(Annotator):
                 attributes = {'score_ed':best_match["score_ed"], "mention" : annotation.value, 'cui':best_match["cui"], 'label': best_match["label"], **annotation.attributes})
                       )
         
-        return res        
+        return res    
+
+
 
     
     def get_embedding(self, annotation):
@@ -643,30 +649,20 @@ class NormPhenoCat(Annotator):
     
     
     def get_codes(self, emb):
-        codes = self.pq.compute_codes(emb)
-        return codes
+        emb = self.pca.apply_py(emb)
+        emb = np.concatenate([emb[0], np.mean(emb, 0)], 0)
+
+        return emb.reshape(1, -1)
     
     def get_closest_match(self, query):
-        distances = []
-        best_md = 1000
-        #iter possible match
-        for target in self.dict_label.values():
-            #compute unorm max distance
-            md = max(map(len, [query, target["seq"]]))
-            max_editdistance = int(md * self.max_editdistance)
-            #get min btw max distance and min res
-            max_editdistance = min(best_md, max_editdistance)
-            res = edlib.align(query = query, target = target["seq"], task ='distance', k = max_editdistance)['editDistance']
-            if res == -1:
-                res = md
-            best_md = min(res, best_md)
-            distances.append(res / md)
-            
-        i_val = heapq.nsmallest(1, enumerate(distances), key=itemgetter(1))
-        best_match = [self.dict_label[t[0]] for t in i_val][0]
-        best_match.update({"score_ed": i_val[0][1]})
+        faiss.normalize_L2(query)
+        D, I = self.index_embedding.search(query, 1)
         
-        return best_match if i_val[0][1] <= self.max_editdistance else {"cui":None, "score_ed":1, "label":None}
+        match = self.dict_label[I.item()]
+        match.update({"score_ed": D.item()})
+        
+
+        return match
             
     
 class FeedDictionnary(Annotator):

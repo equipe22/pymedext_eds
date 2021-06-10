@@ -23,12 +23,15 @@ def get_pymedext_path(text_path):
 def get_ent(doc, ent_types):
     return [ann for ann_type in ent_types for ann in doc.get_annotations(ann_type)]
 
-def brat_norm_to_pdf(dir_path):
+def brat_norm_to_pdf(dir_path, quaero = False):
     """Make pandas dataframe from BRAT annotations with normalizations info"""
     ann_list = glob.glob(join(dir_path, "*.ann"))
     all_ann = []
     for ann_path in ann_list:
-        ann_norm, ann_ner = read_brat_ann(ann_path)
+        if quaero:
+            ann_norm, ann_ner = read_quaero_ann(ann_path)
+        else:
+            ann_norm, ann_ner = read_brat_ann(ann_path)
         ann_ner = pd.DataFrame(ann_ner, columns=["doc_id", "ent_id", "ent_type", "start", "stop", "mention"])
         ann_norm =  pd.DataFrame(ann_norm, columns = ["doc_id", "ann_id", "ent_id", "termino", "cui", "mention"])
         ann_ner = ann_ner.merge(ann_norm, how= "left", on = ["doc_id", "ent_id"], suffixes=['_ner', '_norm'])
@@ -58,6 +61,25 @@ def read_brat_ann(path):
     
     return(ann_norm, ann_ner)
 
+def read_quaero_ann(path):
+    """Read QUAERO ann with normalized annotations"""
+    doc_id =  os.path.splitext(os.path.basename(path))[0].split('_')[-1]
+    with open(path, "r") as h:
+        ann_norm = []
+        ann_ner = []
+        for line in h.readlines():
+            ann_id, field, mention = line.split('\t')
+            if ann_id[0] == "T":
+                ent_type = field.split(' ')[0]
+                start = field.split(' ')[1]
+                stop = field.split(' ')[-1]
+                ann_ner.append((doc_id, ann_id, ent_type, start, stop, mention.strip()))
+            elif ann_id[0] == "#":
+                _, ent_id = field.split(' ')
+                code = mention.split(',')[0]
+                ann_norm.append((doc_id, ann_id, ent_id, "", code, ""))
+    
+    return(ann_norm, ann_ner)
 
 def get_multiline_format(start, end, mention):
     if re.search("\n", mention):
