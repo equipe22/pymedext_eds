@@ -6,7 +6,7 @@ table: note
 limit: 400000
 
 [OUTPUT]
-schema: coronaomop_unstable
+schema: ds_poc
 table: note_nlp_medoc_v2
 write_mode: append
 
