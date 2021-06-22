@@ -3,7 +3,7 @@ import re
 
 import pandas as pd
 from flashtext import KeywordProcessor
-from pymedextcore.annotators import Annotation as Annot, Annotator
+from pymedextcore.annotators import Annotation, Annotator
 from pymedextcore.document import Document
 
 try:
@@ -11,7 +11,7 @@ try:
     from quickumls.constants import ACCEPTED_SEMTYPES
 except:
     print('QuickUMLS not installed. Please use "pip install quickumls"')
-    
+
     # HORRIBLE fix to libconv issue
     ACCEPTED_SEMTYPES = {
         # 'T020', # Acquired Abnormality, ex.: Hemorrhoids; Hernia, Femoral; Cauliflower ear
@@ -133,12 +133,6 @@ from .constants import SECTION_DICT
 from .verbs import verbs_list
 
 
-class Annotation(Annot):
-
-    def __repr__(self):
-        return f'<Annotation "{self.type}">'
-
-
 class Pipeline:
 
     def __init__(self,
@@ -202,7 +196,7 @@ class Endlines(Annotator):
         txt = self.gerer_saut_ligne(txt)
         txt = self.gerer_parenthese(txt)
 
-        txt = re.sub(r"CONCLUSIONS?([A-Za-z])", r"CONCLUSION \1", txt, re.IGNORECASE)
+        txt = re.sub(r"CONCLUSIONS?([A-Za-z])", r"CONCLUSION \1", txt, flags=re.IGNORECASE)
 
         phrases = re.split(r'([\r\n;\?!.])', txt)
 
@@ -230,8 +224,8 @@ class Endlines(Annotator):
         txt = re.sub(r"Dr\.", "Dr ", txt)
         txt = re.sub(r"([A-Z])\.([A-Z])", r"\1 \2", txt)
         txt = re.sub(r"([0-9])\.([0-9])", r"\1,\2", txt)
-        txt = re.sub(r"(:\s*[a-z]+)\s*\n", r"\1.\n", txt, re.IGNORECASE)
-        txt = re.sub(r"\+\n", r"+.\n", txt, re.IGNORECASE)
+        txt = re.sub(r"(:\s*[a-z]+)\s*\n", r"\1.\n", txt, flages=re.IGNORECASE)
+        txt = re.sub(r"\+\n", r"+.\n", txt, flages=re.IGNORECASE)
 
         # on nettoie les espaces multiples
         txt = re.sub(r"([A-Za-z0-9,:])\s+([a-z0-9])", r"\1 \2",
@@ -302,15 +296,14 @@ class SentenceTokenizer(Annotator):
 
         for inp in inps:
 
-            if inp.attributes is None:
-                attributes = None
-            else:
-                attributes = inp.attributes.copy()
-            
-            # TODO: change this.
             for sent in re.split(r'([\r\n;\?!.])', inp.value):
-                
-                if sent in ['.', '', ' ', ';', '']:
+
+                if inp.attributes is None:
+                    attributes = None
+                else:
+                    attributes = inp.attributes.copy()
+
+                if sent in ['.','', ' ', ';']:
                     continue
 
                 start = inp.value.find(sent) + offset
@@ -511,10 +504,10 @@ class SyntagmeTokenizer(Annotator):
         for sent in inp:
 
             syntagmes = self.tokenize_syntagmes(sent.value)
-            
+
             if sent.attributes is None:
                 sent.attributes = {}
-            
+
             for syntagme in syntagmes:
                 start = sent.span[0] + sent.value.find(syntagme)
                 end = start + len(syntagme) - 1
@@ -657,7 +650,7 @@ class RegexMatcher(Annotator):
                 self.list_regexp = json.load(f)
         else:
             self.list_regexp = regexp
-            
+
         super().__init__(key_input, key_output, ID)
 
     def annotate_function(self, _input):
@@ -753,7 +746,7 @@ class QuickUMLSAnnotator(Annotator):
                  accepted_semtypes=None):
 
         super().__init__(key_input, key_output, ID)
-        
+
         if accepted_semtypes is None:
             accepted_semtypes = ACCEPTED_SEMTYPES
 
@@ -829,7 +822,7 @@ class SectionSplitter(Annotator):
         # set any traitement section occuring before histoire or evolution to traitement entree
         index_before_treat = match.loc[lambda x: x.match_type.isin(self.head_before_treat)].index.tolist()
         index_before_treat = min(index_before_treat, default=0)
-        
+
         match.loc[lambda x: (x.match_type == "traitement") \
                   & (x.index < index_before_treat), "match_type"] = "traitement_entree"
 
