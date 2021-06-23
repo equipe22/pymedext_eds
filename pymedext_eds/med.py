@@ -103,9 +103,7 @@ class Pipeline:
 
     def process(self, payload):
         """
-        Does the heavy lifting.
-        
-        TODO: pool sentences together to optimize batch size.
+        Does the heavy lifting. Pools sentences together for faster inference.
         """
         
         docs = {doc['ID']: Document.from_dict(doc) for doc in payload}
@@ -194,7 +192,7 @@ class MedicationAnnotator(Annotator):
                 flair_sentences.append(Sentence(s.value, start_position=s.span[0]))
             else:
                 flair_sentences.append(Sentence(s.value[:self.max_sentence_length], start_position=s.span[0]))
-                # TODO : add sentences by splittin along spaces ?
+                # TODO : add sentences by splitting along spaces ?
                 # for i in range(len(s.value) // self.max_sentence_length):
                 #     flair_sentences.append(
                 #         Sentence(

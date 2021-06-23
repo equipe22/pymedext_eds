@@ -1,30 +1,18 @@
-from ray import serve
-import requests
-
-from pymedext_eds.extract.utils import load_config
-import ray
-
-#from pymedext_eds.med import  Annotator
-#from pymedextcore.document import Document
-from pymedextcore.annotators import Annotation
-import datetime
-import pandas as pd
-import pkg_resources
-from glob import glob
-
-import click
-from tqdm import tqdm 
-
 from ray.serve.utils import _get_logger
+
+import ray
+from ray import serve
+
+import re
+
+# from pymedext_eds.med import  Annotator
+# from pymedextcore.document import Document
 logger = _get_logger()
 
-from typing import List, Dict
+from typing import List
 
 from ray.serve.utils import _get_logger
-import time
 import datetime
-import pandas as pd
-import math
 
 import torch
 
@@ -42,7 +30,7 @@ class Pipeline:
     """
     Pipeline designed to work with Ray 1.2.0
     """
-    
+
     def __init__(self, device=None, mini_batch_size=128):
 
         if device is None:
@@ -79,24 +67,23 @@ class Pipeline:
                                          romedi_path=romedi_path)
 
         self.pipeline = [self.endlines, self.sections, self.sentenceSplitter, self.med, self.norm]
-        
+
     @staticmethod
     def doc2omop(annotated_doc, new_norm=False):
 
         annots = [x.to_dict() for x in
                   annotated_doc.get_annotations('ENT/DRUG') + annotated_doc.get_annotations('ENT/CLASS')]
         sentences = [x.to_dict() for x in annotated_doc.get_annotations('sentence')]
-        
+
         if annots == []:
             return []
-        
-       
+
         note_id = annotated_doc.source_ID
         if annotated_doc.attributes != None:
             person_id = annotated_doc.attributes.get('person_id')
         else:
             person_id = None
-        
+
         res = []
 
         for drug in annots:
@@ -168,100 +155,98 @@ class Pipeline:
         
         TODO: pool sentences together to optimize batch size.
         """
-        
+
         ids = [doc['note_id'] for doc in documents]
         docs = [Document(doc['note_text']) for doc in documents]
-        
+
         for doc in docs:
             doc.annotate([self.endlines, self.sections, self.sentenceSplitter])
-        
+
         sentences = []
         for i, doc in enumerate(docs):
             for annotation in doc.get_annotations('sentence'):
                 annotation.attributes['doc_id'] = i
                 sentences.append(annotation)
-        
+
         logger.info(f"Processing {len(docs)} documents, {len(sentences)} sentences")
-            
+
         placeholder_doc = Document('')
         placeholder_doc.annotations = sentences
-        
+
         try:
             with torch.no_grad():
                 placeholder_doc.annotate([self.med, self.norm])
         except Exception as e:
             logger.warning(f"One of the following documents had an error : {ids}")
             logger.warning(e)
-            
+
         for annotation in placeholder_doc.get_annotations('ENT/DRUG') + placeholder_doc.get_annotations('ENT/CLASS'):
             i = annotation.attributes['doc_id']
             del annotation.attributes['doc_id']
-            
+
             docs[i].annotations.append(annotation)
-        
+
         return [self.doc2omop(doc) for doc in docs]
-    
+
     @serve.accept_batch
     async def __call__(self, requests: List):
         """
         Adaptation to Ray 1.2, with async starlette request mechanism.
         """
-        
+
         documents = []
-        
+
         for request in requests:
             payload = await request.json()
             documents.append(payload)
-        
+
         res = self.process(documents)
 
         return res
 
 
 def run_pipeline(num_replicas=1, num_gpus=1, doc_batch_size=10, batch_wait_timeout=.5, sentence_batch_size=128):
-
     client = serve.start()
-    
+
     config = dict(
         num_replicas=num_replicas,
         max_batch_size=doc_batch_size,
         batch_wait_timeout=batch_wait_timeout,
     )
-    
+
     # ray server
     actor_options = {"num_gpus": num_gpus}
-    
+
     client.create_backend(
-        'annotator', 
-        Pipeline, 
+        'annotator',
+        Pipeline,
         'cuda',
         sentence_batch_size,
         config=config,
         ray_actor_options=actor_options,
     )
-    
+
     client.create_endpoint(
-        "annotator", 
-        backend="annotator", 
-        route="/annotator", 
+        "annotator",
+        backend="annotator",
+        route="/annotator",
         methods=['POST'],
     )
 
 
 if __name__ == '__main__':
-    
+
     logger = _get_logger()
-    
+
     run_pipeline(
-        num_replicas=1, 
-        num_gpus=1, 
-        doc_batch_size=10, 
-        batch_wait_timeout=.5, 
+        num_replicas=1,
+        num_gpus=1,
+        doc_batch_size=10,
+        batch_wait_timeout=.5,
         sentence_batch_size=128,
     )
-    
+
     try:
         pause()
     except KeyboardInterrupt:
         logger.info('Quitting...')
-
