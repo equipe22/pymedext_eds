@@ -15,7 +15,7 @@ blist
 uvicorn
 quickumls
 ray
-pydantic==1.6.2
+pydantic>=1.6.2
 logzero
 gitpython
 PyRuSH
