@@ -152,8 +152,8 @@ class Pipeline:
     def process(self, documents):
         """
         Does the heavy lifting.
-        
-        TODO: pool sentences together to optimize batch size.
+
+        Pools sentences together to optimize batch size.
         """
 
         ids = [doc['note_id'] for doc in documents]
@@ -180,7 +180,9 @@ class Pipeline:
             logger.warning(f"One of the following documents had an error : {ids}")
             logger.warning(e)
 
-        for annotation in placeholder_doc.get_annotations('ENT/DRUG') + placeholder_doc.get_annotations('ENT/CLASS'):
+        for annotation in placeholder_doc.annotations:
+            if annotation.type == 'sentence':
+                continue
             i = annotation.attributes['doc_id']
             del annotation.attributes['doc_id']
 
