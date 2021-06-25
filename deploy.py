@@ -60,7 +60,14 @@ class Pipeline:
             },
         ]
 
-        self.med = MedicationAnnotator(['sentence'], 'med', ID='med:v2', models_param=self.models_param, device=device)
+        self.med = MedicationAnnotator(
+            ['sentence'],
+            'med',
+            ID='med:v2',
+            models_param=self.models_param,
+            device=device,
+            mini_batch_size=mini_batch_size,
+        )
 
         data_path = pkg_resources.resource_filename('pymedext_eds', 'data/romedi')
         romedi_path = glob(data_path + '/*.p')[0]
