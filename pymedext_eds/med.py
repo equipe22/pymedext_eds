@@ -469,7 +469,7 @@ class MedicationAnnotator(Annotator):
                     if att in ['ENT/ROUTE', 'ENT/DOSE', 'ENT/DURATION', 'ENT/FREQ', 'ENT/CONDITION']:
                         for v in val:
                             modifiers.append(f"{att}='{v['value']}'")
-                            if 'normalized_value' in v.keys():
+                            if 'normalized_mention' in v.keys():
                                 modifiers.append(f"{att}_norm='{v['normalized_mention']}'")
 
                     elif att != "normalized_mention":
