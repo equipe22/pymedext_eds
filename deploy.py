@@ -9,6 +9,8 @@ import re
 # from pymedextcore.document import Document
 logger = _get_logger()
 
+from os.path import join
+
 from typing import List
 
 from ray.serve.utils import _get_logger
@@ -31,7 +33,7 @@ class Pipeline:
     Pipeline designed to work with Ray 1.2.0
     """
 
-    def __init__(self, device=None, mini_batch_size=128):
+    def __init__(self, device=None, mini_batch_size=128, data_path='data'):
 
         if device is None:
             if ray.get_gpu_ids():
@@ -45,15 +47,15 @@ class Pipeline:
 
         self.models_param = [
             {
-                'tagger_path': '/export/home/edsprod/app/bigdata/pymedext-eds/data/models/apmed5/entities/final-model.pt',
+                'tagger_path': join(data_path, 'models/apmed5/entities/final-model.pt'),
                 'tag_name': 'entity_pred'
             },
             {
-                'tagger_path': '/export/home/edsprod/app/bigdata/pymedext-eds/data/models/apmed5/events/final-model.pt',
+                'tagger_path': join(data_path, 'models/apmed5/events/final-model.pt'),
                 'tag_name': 'event_pred'
             },
             {
-                'tagger_path': "/export/home/edsprod/app/bigdata/pymedext-eds/data/models/apmed5/drugblob/final-model.pt",
+                'tagger_path': join(data_path, "models/apmed5/drugblob/final-model.pt"),
                 'tag_name': 'drugblob_pred'
             },
         ]
@@ -99,20 +101,13 @@ class Pipeline:
                     else:
                         norm = drug['attributes']['normalized_mention']
 
-                    # new normalization with concept code separated from label 
+                    # new normalization with concept code separated from label
                     # deactivated by default to ensure retro-compatibility
                     if norm is not None and new_norm:
                         norm_extract = re.search('^([A-Z0-9]+) \((.+)\)', norm)
                         if norm_extract:
                             norm = norm_extract.group(1)
                             drug['attributes']['ATC_LABEL'] = norm_extract.group(2)
-            dose = None
-            dose_norm = None
-            route = None
-            duration = None
-            duration_norm = None
-            freq = None
-            freq_norm = None
 
             modifiers = []
             if drug['attributes'] != {}:
@@ -121,7 +116,7 @@ class Pipeline:
                     if att in ['ENT/ROUTE', 'ENT/DOSE', 'ENT/DURATION', 'ENT/FREQ', 'ENT/CONDITION']:
                         for v in val:
                             modifiers.append(f"{att}='{v['value']}'")
-                            if 'normalized_value' in v.keys():
+                            if 'normalized_mention' in v.keys():
                                 modifiers.append(f"{att}_norm='{v['normalized_mention']}'")
 
                     elif att != "normalized_mention":
