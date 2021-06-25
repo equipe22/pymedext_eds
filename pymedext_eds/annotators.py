@@ -224,8 +224,8 @@ class Endlines(Annotator):
         txt = re.sub(r"Dr\.", "Dr ", txt)
         txt = re.sub(r"([A-Z])\.([A-Z])", r"\1 \2", txt)
         txt = re.sub(r"([0-9])\.([0-9])", r"\1,\2", txt)
-        txt = re.sub(r"(:\s*[a-z]+)\s*\n", r"\1.\n", txt, flages=re.IGNORECASE)
-        txt = re.sub(r"\+\n", r"+.\n", txt, flages=re.IGNORECASE)
+        txt = re.sub(r"(:\s*[a-z]+)\s*\n", r"\1.\n", txt, flags=re.IGNORECASE)
+        txt = re.sub(r"\+\n", r"+.\n", txt, flags=re.IGNORECASE)
 
         # on nettoie les espaces multiples
         txt = re.sub(r"([A-Za-z0-9,:])\s+([a-z0-9])", r"\1 \2",
