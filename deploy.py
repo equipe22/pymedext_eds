@@ -202,7 +202,7 @@ class Pipeline:
         return res
 
 
-def run_pipeline(num_replicas=1, num_gpus=1, doc_batch_size=10, batch_wait_timeout=.5, sentence_batch_size=128):
+def run_pipeline(num_replicas=1, num_gpus=1, doc_batch_size=10, batch_wait_timeout=.5, sentence_batch_size=128, data_path='data'):
     client = serve.start()
 
     config = dict(
@@ -219,6 +219,7 @@ def run_pipeline(num_replicas=1, num_gpus=1, doc_batch_size=10, batch_wait_timeo
         Pipeline,
         'cuda',
         sentence_batch_size,
+        data_path,
         config=config,
         ray_actor_options=actor_options,
     )

@@ -123,6 +123,7 @@ if __name__ == '__main__':
             doc_batch_size=doc_batch_size, 
             batch_wait_timeout=batch_wait_timeout, 
             sentence_batch_size=sentence_batch_size,
+            data_path='/export/home/edsprod/app/bigdata/pymedext-eds/data/',
         )
         
         ### launch client
