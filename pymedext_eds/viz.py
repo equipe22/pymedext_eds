@@ -31,7 +31,7 @@ def convert_to_displacy(document, entity_type, attributes=None, label_key = 'lab
                 for att, val in annot.attributes.items():
                     if att in attributes:
                         label += f'/{val}'
-            label = entity_type.upper()
+            #label = entity_type.upper()
             ents.append({"start": annot.span[0], 'end':annot.span[1], "label": label})
             drug_id = annot.ID
 
@@ -72,7 +72,8 @@ def display_annotations(document,  entities = ["ENT/DRUG", "ENT/DOSE"], attribut
     options = {"colors" : {}}
     i = 0
     for entity in entities:
-        options['colors'][entity.upper()] = palette[i % len(palette)]
+        col = palette[i % len(palette)]
+        options['colors'][entity.upper()] = col
         i += 1
 
     return displacy.render(tmp, manual=True, style = 'ent', options = options , jupyter=jupyter, minify=True)
