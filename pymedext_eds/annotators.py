@@ -398,7 +398,7 @@ class SyntagmeTokenizer(Annotator):
             for syntagme in syntagmes:
 
                 start = sent.span[0] + sent.value.find(syntagme)
-                end = start + len(syntagme)-1
+                end = start + len(syntagme)
 
                 res.append(Annotation(
                     type = self.key_output,
@@ -534,9 +534,14 @@ class RegexMatcher(Annotator):
 
     def __init__(self, key_input, key_output, ID, regexp_file = "list_regexp.json"):
 
-        with open(regexp_file , 'r') as f:
-            self.list_regexp = json.load(f)
         super().__init__(key_input, key_output, ID)
+        if type(regexp_file) is str:
+            with open(regexp_file , 'r') as f:
+                self.list_regexp = json.load(f)
+        elif type(regexp_file) is list:
+            self.list_regexp = regexp_file
+        else:
+            raise Exception('wrong type for regexp_file')
 
     def annotate_function(self, _input):
 
@@ -591,6 +596,7 @@ class RegexMatcher(Annotator):
 
                 snippet_span = (max(start-snippet_size, 0), min(end+snippet_size, raw.span[1]))
                 snippet_value = raw.value[snippet_span[0]:snippet_span[1]]
+
 
                 res.append(Annotation(
                     type = self.key_output,
