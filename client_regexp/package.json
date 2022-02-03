@@ -1,23 +1,23 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
-  "private": true,
+  "name": "tailwind",
+  "version": "0.0.1",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "package": "svelte-kit package",
+    "preview": "svelte-kit preview"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0"
+    "@sveltejs/adapter-auto": "^1.0.0-next.17",
+    "@sveltejs/kit": "next",
+    "autoprefixer": "^10.4.2",
+    "postcss": "^8.4.6",
+    "svelte": "^3.44.0",
+    "tailwindcss": "^3.0.18"
   },
+  "type": "module",
   "dependencies": {
-    "sirv-cli": "^2.0.0"
+    "@sveltejs/adapter-static": "^1.0.0-next.26",
+    "regulex": "^0.0.5"
   }
 }

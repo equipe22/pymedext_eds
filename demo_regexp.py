@@ -20,12 +20,12 @@ app = Flask(__name__)
 # Path for our main Svelte page
 @app.route("/")
 def base():
-    return send_from_directory('client_regexp/public', 'index.html')
+    return send_from_directory('client_regexp/build', 'index.html')
 
 # Path for all the static files (compiled JS/CSS, etc.)
 @app.route("/<path:path>")
 def home(path):
-    return send_from_directory('client_regexp/public', path)
+    return send_from_directory('client_regexp/build', path)
 
 @app.route('/annotate',methods = ['POST'])
 def result():
